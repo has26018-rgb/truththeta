@@ -86,6 +86,8 @@ nav.tabs a[aria-current="page"] .k{text-decoration:underline;text-decoration-thi
 .btn:disabled{opacity:.45;cursor:default}
 .chip{border:1px solid var(--grid);background:var(--sheet);border-radius:999px;padding:6px 12px;font-size:.85rem}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.chip[aria-pressed="true"] .muted{color:inherit;opacity:.8}
+[hidden]{display:none!important}
 /* home */
 .hero{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
 .hero .stamp{width:78px;height:78px;border:3px solid var(--shu);color:var(--shu);border-radius:50%;display:grid;place-items:center;text-align:center;
@@ -114,11 +116,12 @@ nav.tabs a[aria-current="page"] .k{text-decoration:underline;text-decoration-thi
 .note h2 .jp{color:var(--shu);font-size:1rem}
 .note h3{margin-block:14px 6px}
 .tbl{overflow-x:auto;border:1px solid var(--grid);border-radius:8px}
-table{border-collapse:collapse;width:100%;font-size:.9rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem;word-break:keep-all}
 th,td{padding:7px 10px;border-bottom:1px solid var(--grid-soft);text-align:left;vertical-align:top}
 th{background:var(--grid-soft);font-weight:700;font-size:.8rem;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 td .jp,.big-jp{font-size:1.12rem}
+td .jp{white-space:nowrap}
 .callout{border-left:4px solid var(--shu);background:var(--shu-soft);padding:10px 12px;border-radius:0 8px 8px 0}
 .callout.ai{border-color:var(--ai);background:var(--ai-soft)}
 .callout b{color:var(--shu)}
@@ -159,6 +162,7 @@ ul.tight li{margin-block:2px}
 .qtag{font-size:.75rem;color:var(--ink-2);font-weight:700;letter-spacing:.04em;display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-right:72px}
 .qtag .hot{color:var(--shu);border:1px solid var(--shu);border-radius:3px;padding:0 5px}
 .qprompt{margin-block:12px 4px;font-size:1.15rem;font-weight:600;overflow-wrap:anywhere}
+.qcard.done .qprompt{padding-right:70px}
 .qprompt .jp.huge{font-size:3.2rem;font-weight:600;line-height:1.2;display:inline-block;min-width:1.4em;text-align:center;border:2px solid var(--grid);border-radius:8px;padding:4px 12px;background:var(--paper)}
 .qprompt .jp.big{font-size:1.7rem}
 .qhint{font-size:.86rem;color:var(--ink-2)}
@@ -331,7 +335,8 @@ const WORDS2 = [
  {k:'ひる',j:'昼',m:'낮'},
  {k:'よる',j:'夜',m:'밤'},
  {k:'もうします',j:'申します',m:'~라고 합니다 (겸손)'},
- {k:'ようび',j:'曜日',m:'요일'}
+ {k:'ようび',j:'曜日',m:'요일'},
+ {k:'おつかれさま',j:'お疲れ様',m:'수고 (수고하셨습니다)'}
 ];
 
 const PARTICLES = [
@@ -343,7 +348,7 @@ const PARTICLES = [
  {p:'へ',use:'~에/~으로 (방향) · [에]로 읽음',ex:'やまへ いく',exk:'야마에 이쿠 (산으로 가다)',q:'やま（　）いく',qk:'산으로 가다 (방향)',no:['に'],read:'에'},
  {p:'も',use:'~도 (역시)',ex:'わたしも',exk:'나도',q:'わたし（　）',qk:'나도'},
  {p:'や',use:'~(이)나 · ~랑 (일부 나열)',ex:'すしや さしみ',exk:'초밥이랑 회',q:'すし（　）さしみ',qk:'초밥이랑 회 (일부 나열)',no:['と']},
- {p:'を',use:'~을/를 (목적어) · [오]로 읽음',ex:'うたを よむ',exk:'우타오 요무',q:'うた（　）よむ',qk:'노래를 읽다',read:'오'}
+ {p:'を',use:'~을/를 (목적어) · [오]로 읽음',ex:'うたを よむ',exk:'우타오 요무',q:'うた（　）よむ',qk:'우타오 요무 — 목적어 ~을/를',read:'오'}
 ];
 
 const KOSOADO = {
@@ -369,10 +374,10 @@ const PUZZLE = ['いろはによてわみさお','おかおぬよろかちめじ
 const PUZZLE_ANS = [
  {n:1,w:'おはよう',sit:'등교길에 학교 앞에서 친구와 만나 하는 아침 인사',read:'오하요-',pos:'2행 3열 → 대각선 ↘',polite:'おはようございます',pk:'(윗사람에게)'},
  {n:2,w:'はじめまして',sit:'처음 만난 사람에게 하는 초면 인사',read:'하지메마시테',pos:'7행 2열 → 가로 →'},
- {n:3,w:'おめでとう',sit:'졸업을 축하할 때 하는 인사',read:'오메데토-',pos:'1행 10열 → 대각선 ↙',polite:'おめでとうございます'},
- {n:4,w:'ありがとう',sit:'선물을 받고 고맙다고 하는 인사',read:'아리가토-',pos:'4행 9열 → 세로 ↓',polite:'ありがとうございます'},
- {n:5,w:'おやすみ',sit:'어머니가 나에게 잠자기 전에 하는 인사',read:'오야스미',pos:'2행 1열 → 세로 ↓',polite:'おやすみなさい'},
- {n:6,w:'よろしく',sit:'잘 부탁해요',read:'요로시쿠',pos:'9행 1열 → 가로 →',polite:'どうぞ よろしく おねがいします'}
+ {n:3,alt:['おめでとうございます'],w:'おめでとう',sit:'졸업을 축하할 때 하는 인사',read:'오메데토-',pos:'1행 10열 → 대각선 ↙',polite:'おめでとうございます'},
+ {n:4,alt:['ありがとうございます','どうもありがとうございます'],w:'ありがとう',sit:'선물을 받고 고맙다고 하는 인사',read:'아리가토-',pos:'4행 9열 → 세로 ↓',polite:'ありがとうございます'},
+ {n:5,alt:['おやすみなさい'],w:'おやすみ',sit:'어머니가 나에게 잠자기 전에 하는 인사',read:'오야스미',pos:'2행 1열 → 세로 ↓',polite:'おやすみなさい'},
+ {n:6,alt:['どうぞよろしくおねがいします','よろしくおねがいします','どうぞよろしく'],w:'よろしく',sit:'잘 부탁해요',read:'요로시쿠',pos:'9행 1열 → 가로 →',polite:'どうぞ よろしく おねがいします'}
 ];
 
 // 초난강 인사송 (가타카나 줄은 시험범위 밖)
@@ -458,13 +463,13 @@ const PRON = [
  {w:'きって',r:'킷테',d:['키츠테','키테','킷츠테'],why:'작은 っ = 소리 없이 한 박 쉬고, 뒤 て 때문에 ㅅ받침처럼.'},
  {w:'がっこう',r:'각코-',d:['가츠코우','가코-','각코우'],why:'っ + こ → ㄱ받침, こう는 장음 → [코-].'},
  {w:'きょう',r:'쿄-',d:['키요우','키요-','쿄우'],why:'き + 작은 ょ = 요음 [쿄] 한 박, う는 장음.'},
- {w:'きよう',r:'키요-',d:['쿄-','키요우','쿄우'],why:'큰 よ라서 き·よ 따로 → [키요-]. (솜씨 좋음)'},
+ {w:'きよう',r:'키요-',d:['쿄-','쿄우','키유-'],why:'큰 よ라서 き·よ 따로 → [키요-]. よう는 お단+う 장음이라 [요-]. (솜씨 좋음)'},
  {w:'びょういん',r:'뵤-인',d:['비요-인','뵤우인','비요우인'],why:'작은 ょ = [뵤] 한 박 → 병원.'},
  {w:'びよういん',r:'비요-인',d:['뵤-인','비요우인','뵤우인'],why:'큰 よ = [비요] → 미용실.'},
  {w:'いってきます',r:'잇테키마스',d:['이츠테키마스','이테키마스','잇테키마수'],why:'촉음 っ = ㅅ받침처럼, 6박.'},
  {w:'いってらっしゃい',r:'잇테랏샤이',d:['이츠테라츠시야이','잇테라샤이','이테랏시야이'],why:'っ 두 번 + 요음 しゃ. 범위 최고 난도.'},
  {w:'あかちゃん',r:'아카챵',d:['아카치야앙','아가챵','아카치얀'],why:'ち + 작은 ゃ = [챠] 한 박.'},
- {w:'ききょうじょし',r:'키쿄-조시',d:['키키요우지요시','기교-조시','키쿄우지요시'],why:'きょう = 요음 + 장음, じょ = 탁음 + 요음. (桔梗女子)'},
+ {w:'ききょうじょし',r:'키쿄-조시',d:['키키요우지요시','기교-조시','키쿄우지요시'],why:'きょう = 요음 + 장음, じょ = 탁음 + 요음. じょ는 [죠]·[조] 같은 소리. (桔梗女子)'},
  {w:'どういたしまして',r:'도-이타시마시테',d:['도우이타시마시테','토-이타시마시테','도-이다시마시테'],why:'お단(ど) + う = 장음 → [도-].'},
  {w:'たんじょうび',r:'탄죠-비',d:['탄지요우비','탄조우비','탄죠우비'],why:'じょ = 요음, う는 장음.'},
  {w:'しゅっせき',r:'슛세키',d:['시유츠세키','슈세키','슈츠세키'],why:'しゅ = 요음 한 박, っ = ㅅ받침처럼.'},
@@ -484,8 +489,8 @@ const CONCEPT = [
  {g:'rules',q:'じ와 소리가 똑같은 글자는?',a:'ぢ',d:['ず','ぎ','ち'],ex:'じ와 ぢ는 둘 다 [지]. 기본은 거의 다 じ를 써요.',jp:1},
  {g:'rules',q:'は → ば → ぱ 의 소리 변화로 맞는 것은?',a:'하 → 바 → 파',d:['하 → 파 → 바','바 → 하 → 파','하 → 가 → 파'],ex:'h → b(탁음) → p(반탁음).'},
  {g:'rules',q:'탁음은 어떤 소리를 어떤 소리로 바꾸나?',a:'무성음 → 유성음',d:['유성음 → 무성음','짧은 소리 → 긴 소리','h 소리 → p 소리'],ex:'성대가 안 떨리던 소리가 떨리는 소리로. 목에 손 대고 "가"와 "카"를 비교!'},
- {g:'rules',q:'장음: え단 글자 뒤에 붙여 길게 끄는 글자는?',a:'い',d:['え','う','あ'],ex:'とけい → [토케-]. え단 + い.',jp:1,hot:1},
- {g:'rules',q:'장음: お단 글자 뒤에 붙여 길게 끄는 글자는?',a:'う',d:['お','い','あ'],ex:'こうこう → [코-코-]. お단 + う.',jp:1,hot:1},
+ {g:'rules',q:'장음 (정리본 규칙): え단 글자 뒤에 붙여 길게 끄는 글자는?',a:'い',d:['え','う','あ'],ex:'とけい → [토케-]. え단 + い.',jp:1,hot:1},
+ {g:'rules',q:'장음 (정리본 규칙): お단 글자 뒤에 붙여 길게 끄는 글자는?',a:'う',d:['お','い','あ'],ex:'こうこう → [코-코-]. お단 + う.',jp:1,hot:1},
  {g:'rules',q:'장음에서 붙은 い·う는 어떻게 하나?',a:'앞 소리를 길게 끌라는 표시일 뿐, 따로 소리 내지 않는다',d:['그 글자 소리를 또박또박 낸다','소리도 박자도 없다','받침처럼 읽는다'],ex:'とけい는 [토케이]가 아니라 [토케-]. 그래도 박자는 한 박 차지!',hot:1},
  {g:'rules',q:'장음은 박자를 차지할까?',a:'한 박을 차지한다',d:['박자가 없다','반 박만 차지한다','두 박을 차지한다'],ex:'とけい = と·け·ー 3박.'},
  {g:'rules',q:'おかあさん 의 장음은 어떤 규칙?',a:'あ단 + あ',d:['お단 + う','あ단 + う','え단 + い'],ex:'[오카-상] 어머니.'},
@@ -519,14 +524,49 @@ const CONCEPT = [
  {g:'particle',q:'조사(★)가 아닌 것은?',a:'さ',d:['か','に','も'],ex:'조사 9개: か と に の は へ も や を.',jp:1},
  {g:'particle',q:'조사는 모두 몇 개로 정리했나?',a:'9개',d:['5개','7개','12개'],ex:'か と に の は へ も や を.'},
  // こそあど
- {g:'kosoado',q:"'저기'가 こ·そ·あ·ど 규칙(あ+こ)과 다른 점은?",a:'あこ가 아니라 あそこ',d:['あちこ','あこ','あれこ'],ex:'ここ·そこ·あそこ·どこ — あそこ만 예외!',hot:1},
+ {g:'kosoado',q:"'저기'를 바르게 쓴 것은? (こ·そ·あ·ど 예외)",a:'あそこ',d:['あこ','あちこ','あれこ'],jp:1,ex:'ここ·そこ·あそこ·どこ — あそこ만 예외!',hot:1},
  {g:'kosoado',q:'この·その·あの·どの 와 これ·それ·あれ·どれ 의 차이는?',a:'この 등은 뒤에 명사가 와야 하고, これ 등은 혼자 "~것"',d:['뜻이 완전히 같다','この 등은 장소, これ 등은 방향','この 등은 존댓말이다'],ex:'この くつ(이 신발) / これ(이것).',hot:1}
 ];
+CONCEPT.push(
+ {g:'rules',q:'장음: あ단 글자 뒤에 붙이는 글자는?',a:'あ',d:['う','い','お'],ex:'おかあさん [오카-상] 어머니.',jp:1},
+ {g:'rules',q:'장음: い단 글자 뒤에 붙이는 글자는?',a:'い',d:['う','え','あ'],ex:'おにいさん [오니-상] 형·오빠.',jp:1},
+ {g:'rules',q:'장음: う단 글자 뒤에 붙이는 글자는?',a:'う',d:['お','い','あ'],ex:'くうき [쿠-키] 공기.',jp:1},
+ {g:'rules',q:'くうき 의 장음 규칙은?',a:'う단 + う',d:['お단 + う','い단 + い','あ단 + あ'],ex:'く(う단) + う → [쿠-키].'},
+ {g:'rules',q:'おにいさん 의 장음 규칙은?',a:'い단 + い',d:['え단 + い','あ단 + あ','う단 + う'],ex:'に(い단) + い → [오니-상].'},
+ {g:'rules',q:'とけい 의 장음 규칙은?',a:'え단 + い',d:['い단 + い','お단 + う','あ단 + あ'],ex:'け(え단) + い → [토케-].',hot:1},
+ {g:'rules',q:'こうこう 의 장음 규칙은?',a:'お단 + う',d:['う단 + う','え단 + い','あ단 + あ'],ex:'こ(お단) + う → [코-코-].',hot:1},
+ {g:'rules',q:"'형·오빠'를 바르게 쓴 것은?",a:'おにいさん',d:['おにさん','おねいさん','おにいさ'],ex:'に + い 장음 → [오니-상].',jp:1,typeable:1},
+ {g:'rules',q:"'공기'를 바르게 쓴 것은?",a:'くうき',d:['くき','こうき','くうぎ'],ex:'く + う 장음 → [쿠-키].',jp:1,typeable:1},
+ {g:'rules',q:"'어머니(おかあさん)'를 바르게 쓴 것은?",a:'おかあさん',d:['おかさん','おかあさ','おがあさん'],ex:'か + あ 장음 → [오카-상].',jp:1,typeable:1},
+ {g:'rules',q:'장음은 어느 단에 있나?',a:'모든 단 (あ·い·う·え·お단)',d:['え단·お단에만','あ단에만','は행에만'],ex:'あ단+あ, い단+い, う단+う, え단+い, お단+う.'},
+ {g:'rules',q:'청음(기본 히라가나)은 모두 몇 자?',a:'46자',d:['50자','45자','48자'],ex:'あ~ん 46자.'},
+ {g:'rules',q:'ず와 소리가 똑같은 글자는?',a:'づ',d:['じ','す','つ'],ex:'ず와 づ는 둘 다 [즈].',jp:1},
+ {g:'rules',q:'탁점(゛)·반탁점(゜)을 찍는 위치는?',a:'글자 오른쪽 위',d:['글자 왼쪽 위','글자 오른쪽 아래','글자 바로 아래'],ex:'점 두 개·동그라미 모두 오른쪽 위에.'},
+ {g:'rules',q:'ん 뒤에 ま·ば·ぱ행이 오면 ん은 어떻게 들리나?',a:'ㅁ 받침',d:['ㄴ 받침','ㅇ 받침','ㄱ 받침'],ex:'こんばんは [콤방와].',hot:1},
+ {g:'rules',q:'かんこく(한국)의 ん은?',a:'ㅇ 받침 [캉코쿠]',d:['ㅁ 받침 [캄코쿠]','소리 없음 [카코쿠]','ㄱ 받침 [칵코쿠]'],ex:'か·が행 앞의 ん → ㅇ.'},
+ {g:'rules',q:'こんにちは의 ん은?',a:'ㄴ 받침',d:['ㅁ 받침','ㅇ 받침','ㄱ 받침'],ex:'さ·た·な·ら행 앞의 ん → ㄴ. [콘니치와]'},
+ {g:'rules',q:'(선생님 메모) ん의 발음은 몇 종류?',a:'4종류',d:['1종류','2종류','3종류'],ex:'ㅁ (ま·ば·ぱ 앞) · ㄴ (さ·た·な·ら 앞) · ㅇ (か·が 앞) · 단어 끝 콧소리 [ㅇ에 가까움].'},
+ {g:'small',q:'き し ち に ひ み り 7글자에 ゃ·ゅ·ょ를 붙인 요음은 몇 개?',a:'21개',d:['7개','15개','36개'],ex:'7 × 3 = 21개 (청음 요음).'},
+ {g:'small',q:'(정리본 기준) 요음은 모두 몇 개?',a:'36개 (21+15)',d:['21개','25개','46개'],ex:'청음 21 + 탁음·반탁음 15 = 36. 교과서 표는 ぢゃ 줄이 없어 33개 — 선생님 말씀을 따르세요.'},
+ {g:'small',q:'(정리본 기준) 요음이 붙는 탁음·반탁음 글자는?',a:'ぎ じ ぢ び ぴ',d:['が ざ だ ば ぱ','ぐ ず づ ぶ ぷ','げ ぜ で べ ぺ'],ex:'모두 い단 글자.',jp:1},
+ {g:'kosoado',q:'こちら·そちら·あちら·どちら 는 무엇을 가리키나?',a:'방향 (~쪽)',d:['물건 (~것)','장소 (~기)','명사 수식 (~런)'],ex:'ちら = 방향.',hot:1},
+ {g:'kosoado',q:'これ·それ·あれ·どれ 는?',a:'물건 (~것)',d:['장소 (~기)','방향 (~쪽)','명사 수식 (~런)'],ex:'れ = 물건.'},
+ {g:'kosoado',q:'ここ·そこ·あそこ·どこ 는?',a:'장소 (~기)',d:['물건 (~것)','방향 (~쪽)','명사 수식 (~런)'],ex:'こ = 장소.'},
+ {g:'kosoado',q:'다음 중 장소를 나타내는 말은?',a:'あそこ',d:['あれ','あちら','あの'],ex:'あそこ = 저기.',jp:1},
+ {g:'kosoado',q:'다음 중 방향을 나타내는 말은?',a:'そちら',d:['それ','そこ','その'],ex:'そちら = 그쪽.',jp:1},
+ {g:'kosoado',q:'こんな·そんな·あんな·どんな 의 뜻은?',a:'이런·그런·저런·어떤',d:['이것·그것·저것·어느 것','여기·거기·저기·어디','이쪽·그쪽·저쪽·어느 쪽'],ex:'んな = ~런 (뒤에 명사).'},
+ {g:'particle',q:'[콘니치와]를 바르게 쓴 것은?',a:'こんにちは',d:['こんにちわ','こんにちば','こんにちお'],ex:'끝은 조사 は — 소리는 [와]여도 は로 써요.',jp:1,hot:1,typeable:1},
+ {g:'particle',q:'[콤방와]를 바르게 쓴 것은?',a:'こんばんは',d:['こんばんわ','こんばんば','こばんは'],ex:'끝은 조사 は.',jp:1,hot:1,typeable:1},
+ {g:'particle',q:'[와타시와] (나는)를 바르게 쓴 것은?',a:'わたしは',d:['わたしわ','はたしは','わたしお'],ex:'조사 は = [와] 소리, 글자는 は.',jp:1,hot:1,typeable:1},
+ {g:'particle',q:'[야마에 이쿠] (산으로 가다)를 바르게 쓴 것은?',a:'やまへ いく',d:['やまえ いく','やまべ いく','やまへ いぐ'],ex:'조사 へ = [에] 소리, 글자는 へ.',jp:1,hot:1,typeable:1},
+ {g:'particle',q:'[우타오 요무]를 바르게 쓴 것은?',a:'うたを よむ',d:['うたお よむ','うたほ よむ','うだを よむ'],ex:'조사 を = [오] 소리, 글자는 を.',jp:1,hot:1,typeable:1}
+);
 
 /* =========================================================
    HELPERS
    ========================================================= */
 const $ = (s, r) => (r||document).querySelector(s);
+const ymd = (d=new Date()) => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const $$ = (s, r) => Array.from((r||document).querySelectorAll(s));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const J = s => '<span class="jp" lang="ja">'+esc(s)+'</span>';
@@ -541,6 +581,11 @@ const SMALLSET = new Set(['ゃ','ゅ','ょ','ぁ','ぃ','ぅ','ぇ','ぉ']);
 const kanaOnly = s => s.replace(/[\s　、。,.!！?？/○]/g,'');
 const moraCount = s => [...kanaOnly(s)].filter(c=>!SMALLSET.has(c)).length;
 const moraSplit = s => { const out=[]; for(const c of kanaOnly(s)){ if(SMALLSET.has(c) && out.length) out[out.length-1]+=c; else out.push(c);} return out; };
+// 박자 표시용: 장음 글자를 ー로 (정리본 표기와 같게)
+const VOW = {}; [['あかさたなはまやらわがざだばぱ','a'],['いきしちにひみりぎじぢびぴ','i'],['うくすつぬふむゆるぐずづぶぷ','u'],['えけせてねへめれげぜでべぺ','e'],['おこそとのほもよろをごぞどぼぽ','o']].forEach(([cs,v])=>[...cs].forEach(c=>VOW[c]=v));
+const unitVowel = u => { const last=u.slice(-1); return ({'ゃ':'a','ゅ':'u','ょ':'o'})[last] || VOW[last]; };
+const moraDisp = s => { const m=moraSplit(s); return m.map((u,i)=>{ if(!i) return u; const pv=unitVowel(m[i-1]);
+  if((u==='う' && (pv==='o'||pv==='u')) || (u==='い' && (pv==='e'||pv==='i')) || (u==='あ' && pv==='a')) return 'ー'; return u; }); };
 
 const ODAN = new Set('おこそとのほもよろごぞどぼぽょ'.split(''));
 const EDAN = new Set('えけせてねへめれげぜでべぺ'.split(''));
@@ -579,7 +624,7 @@ const DECKS = [
  {id:'kana',   name:'청음 46자 읽기',        group:'글자'},
  {id:'kana2',  name:'탁음·반탁음 읽기',      group:'글자'},
  {id:'yoon',   name:'요음 읽기',             group:'글자'},
- {id:'kanaw',  name:'소리 듣고 글자 고르기', group:'글자'},
+ {id:'kanaw',  name:'글자 쓰기 (소리·요음·50음도 빈칸)', group:'글자'},
  {id:'wordm',  name:'단어 → 뜻',             group:'단어'},
  {id:'wordw',  name:'뜻 → 히라가나 (함정 보기)', group:'단어'},
  {id:'kanji',  name:'한자 → 뜻·읽기',        group:'단어'},
@@ -593,7 +638,8 @@ const DECKS = [
  {id:'rules',  name:'탁음·반탁음·장음 규칙', group:'발음'},
  {id:'small',  name:'촉음·요음 (작은 글자)', group:'발음'},
  {id:'pron',   name:'읽는 법 (발음 함정)',   group:'발음'},
- {id:'mora',   name:'박자 세기',             group:'발음'}
+ {id:'mora',   name:'박자 세기',             group:'발음'},
+ {id:'spell',  name:'발음 보고 히라가나 쓰기', group:'발음'}
 ];
 const DECK = Object.fromEntries(DECKS.map(d=>[d.id,d]));
 const ITEMS = [], BYID = {};
@@ -614,21 +660,21 @@ function wordCard(w){
   const readPool = (list)=> list.map(x=>x[2]);
   SEION.forEach(([k,ro,ko])=>{
     add('kana',{id:'kana:'+k,q:'<span class="jp huge">'+esc(k)+'</span>',hint:'이 글자의 소리는?',a:ko+' ('+ro+')',
-      d:SEION.filter(x=>x[2]!==ko).map(x=>x[2]+' ('+x[1]+')'),ex:J(k)+' = ['+esc(ko)+'] '+esc(ro)+(k==='ん'?' — 받침처럼 ㄴ·ㅁ·ㅇ 소리로 들려요.':'')+(k==='を'?' — お와 소리가 같고 조사로만 써요.':'')});
+      d:SEION.filter(x=>x[2]!==ko && !(k==='は'&&x[0]==='わ') && !(k==='へ'&&x[0]==='え')).map(x=>x[2]+' ('+x[1]+')'),ex:J(k)+' = ['+esc(ko)+'] '+esc(ro)+(k==='ん'?' — 뒤 글자에 따라 ㅁ·ㄴ·ㅇ 받침, 단어 끝은 콧소리.':'')+(k==='を'?' — お와 소리가 같고 조사로만 써요.':'')+(k==='は'?' — 조사로 쓸 때만 [와].':'')+(k==='へ'?' — 조사로 쓸 때만 [에].':'')});
   });
   DAKU.concat(HANDAKU).forEach(([k,ro,ko])=>{
     const isH = HANDAKU.some(x=>x[0]===k);
     add('kana2',{id:'kana2:'+k,q:'<span class="jp huge">'+esc(k)+'</span>',hint:'이 글자의 소리는?',a:ko+' ('+ro+')',
       d:DAKU.concat(HANDAKU,SEION).filter(x=>x[2]!==ko).map(x=>x[2]+' ('+x[1]+')'),
       trapD: (function(){ const base = UNDAK[k]||UNHAN[k]; const t=[]; const f=readAll.find(x=>x[0]===base); if(f && f[2]!==ko) t.push(f[2]+' ('+f[1]+')'); if(isH){const b=DAKU.find(x=>x[0]===DAK[UNHAN[k]]); if(b) t.push(b[2]+' ('+b[1]+')');} else if(HAN[k]){const p=HANDAKU.find(x=>x[0]===HAN[k]); if(p) t.push(p[2]+' ('+p[1]+')');} return t; })(),
-      ex:J(k)+' = ['+esc(ko)+'] '+esc(ro)+(['じ','ぢ'].includes(k)?' — si/ti가 아니라 [지]! じ와 ぢ는 소리가 같아요.':'')+(k==='づ'||k==='ず'?' — [즈]. tu/du가 아님.':'')+(isH?' — 반탁음(゜)은 は행에만, h→p.':' — 탁음(゛).'),
+      ex:J(k)+' = ['+esc(ko)+'] '+esc(ro)+(k==='じ'?' — し→じ는 zi가 아니라 [지]! ぢ와 소리가 같아요.':'')+(k==='ぢ'?' — ち→ぢ는 di가 아니라 [지]! じ와 소리가 같아요.':'')+(k==='づ'?' — つ→づ는 du가 아니라 [즈]! ず와 소리가 같아요.':'')+(k==='ず'?' — す→ず (s→z) 규칙대로. づ와 소리가 같아요.':'')+(isH?' — 반탁음(゜)은 は행에만, h→p.':' — 탁음(゛).'),
       hot: ['じ','ぢ','づ'].includes(k)?1:0});
   });
   YOON.forEach(([k,ro,ko])=>{
     add('yoon',{id:'yoon:'+k,q:'<span class="jp huge">'+esc(k)+'</span>',hint:'요음 — 소리는? (한 박)',a:ko+' ('+ro+')',
       d:uniq(YOON.filter(x=>x[2]!==ko).map(x=>x[2]+' ('+x[1]+')')),
-      trapD:[ (SEION.concat(DAKU,HANDAKU).find(x=>x[0]===k[0])||['','',''])[2] + (SEION.find(x=>x[0]===TO_BIG[k[1]])||['','',''])[2] + ' (두 박으로 읽기)' ],
-      ex:J(k)+' = ['+esc(ko)+'] '+esc(ro)+' — い단 글자 + 작은 '+J(k[1])+' = 한 박.'});
+      trapD:[ (SEION.concat(DAKU,HANDAKU).find(x=>x[0]===k[0])||['','',''])[2] + (SEION.find(x=>x[0]===TO_BIG[k[1]])||['','',''])[2] + ' (' + (SEION.concat(DAKU,HANDAKU).find(x=>x[0]===k[0])||['',''])[1] + (SEION.find(x=>x[0]===TO_BIG[k[1]])||['',''])[1] + ')' ],
+      ex:J(k)+' = ['+esc(ko)+'] '+esc(ro)+' — い단 글자 + 작은 '+J(k[1])+' = 한 박. 두 글자를 따로 읽으면 오답.'});
   });
   // 소리 → 글자 (같은 소리 글자는 문제·보기에서 제외)
   SEION.concat(DAKU,HANDAKU).forEach(([k,ro,ko])=>{
@@ -636,7 +682,7 @@ function wordCard(w){
     const same = SEION.concat(DAKU,HANDAKU).filter(x=>x[2]===ko).map(x=>x[0]);
     const look = (LOOKALIKE.find(g=>g.includes(k))||[]).filter(x=>x!==k && !same.includes(x));
     add('kanaw',{id:'kanaw:'+k,q:'<b style="font-size:1.6rem">['+esc(ko)+']</b> <span class="muted">'+esc(ro)+'</span>',hint:'이 소리의 히라가나는?',a:k,jp:1,
-      d:SEION.concat(DAKU,HANDAKU).map(x=>x[0]).filter(x=>!same.includes(x)),trapD:look.concat(DAK[k]&&!same.includes(DAK[k])?[DAK[k]]:[], UNDAK[k]&&!same.includes(UNDAK[k])?[UNDAK[k]]:[]),
+      alt:same.filter(x=>x!==k),typeable:1,d:SEION.concat(DAKU,HANDAKU).map(x=>x[0]).filter(x=>!same.includes(x) && !((k==='わ'&&x==='は')||(k==='え'&&x==='へ'))),trapD:look.concat(DAK[k]&&!same.includes(DAK[k])?[DAK[k]]:[], UNDAK[k]&&!same.includes(UNDAK[k])?[UNDAK[k]]:[]),
       ex:'['+esc(ko)+'] = '+J(k)+(same.length>1?' (같은 소리: '+same.filter(x=>x!==k).map(J).join(', ')+')':'')});
   });
 
@@ -663,26 +709,29 @@ function wordCard(w){
       add('homo',{id:'homo:'+j,q:'<span class="jp big">'+esc(j)+'</span> <span class="muted">('+J(h.k)+')</span>',hint:'한자를 보고 뜻 고르기',a:m,d:[other[1]].concat(allMeanings.filter(x=>x!==m&&x!==other[1])),trapD:[other[1]],
         ex:J(h.k)+' — '+J(h.a[0])+' '+esc(h.a[1])+' / '+J(h.b[0])+' '+esc(h.b[1])+'. 히라가나만 보면 똑같아요.',hot:1});
     });
-    add('homo',{id:'homo:k:'+h.k,q:'<b>'+esc(h.a[1])+'</b> 와(과) <b>'+esc(h.b[1])+'</b>',hint:'둘 다 히라가나로 똑같이 쓰는 것은?',a:h.k,jp:1,d:WORDS.map(x=>x.k).filter(x=>x!==h.k),trapD:traps(h.k),
+    add('homo',{id:'homo:k:'+h.k,typeable:1,q:'<b>'+esc(h.a[1])+'</b> 와(과) <b>'+esc(h.b[1])+'</b>',hint:'둘 다 히라가나로 똑같이 쓰는 것은?',a:h.k,jp:1,d:WORDS.map(x=>x.k).filter(x=>x!==h.k),trapD:traps(h.k),
       ex:J(h.a[0])+' '+esc(h.a[1])+' = '+J(h.b[0])+' '+esc(h.b[1])+' = '+J(h.k),hot:1});
   });
-  [['くつ','신발','くつした','양말'],['この','이~ (+명사)','これ','이것'],['その','그~ (+명사)','それ','그것'],['あの','저~ (+명사)','あれ','저것']].forEach(([a,am,b,bm])=>{
-    add('homo',{id:'homo:pair:'+a,q:'<b>'+esc(am)+'</b>',hint:J(a)+' 와 '+J(b)+' 중 하나',a:a,jp:1,d:[b],trapD:[b],ex:J(a)+' '+esc(am)+' ↔ '+J(b)+' '+esc(bm),hot:1});
-    add('homo',{id:'homo:pair:'+b,q:'<b>'+esc(bm)+'</b>',hint:J(a)+' 와 '+J(b)+' 중 하나',a:b,jp:1,d:[a],trapD:[a],ex:J(a)+' '+esc(am)+' ↔ '+J(b)+' '+esc(bm),hot:1});
+  [['にく','고기','くに','나라'],['くつ','신발','くつした','양말'],['この','이~ (+명사)','これ','이것'],['その','그~ (+명사)','それ','그것'],['あの','저~ (+명사)','あれ','저것']].forEach(([a,am,b,bm])=>{
+    add('homo',{id:'homo:pair:'+a,q:'<b>'+esc(am)+'</b>',hint:J(a)+' 와 '+J(b)+' 중 하나',a:a,jp:1,d:[b],trapD:[b],ex:J(a)+' '+esc(am)+' ↔ '+J(b)+' '+esc(bm),hot:1,typeable:1});
+    add('homo',{id:'homo:pair:'+b,q:'<b>'+esc(bm)+'</b>',hint:J(a)+' 와 '+J(b)+' 중 하나',a:b,jp:1,d:[a],trapD:[a],ex:J(a)+' '+esc(am)+' ↔ '+J(b)+' '+esc(bm),hot:1,typeable:1});
   });
   // 수업·인사 속 단어
   const m2 = WORDS2.map(w=>w.m);
   WORDS2.forEach(w=>{
-    add('vocab2',{id:'v2:m:'+w.k,q:'<span class="jp big">'+esc(w.k)+'</span>'+(w.j?' <span class="jp muted">'+esc(w.j)+'</span>':''),hint:'뜻은?',a:w.m,d:m2.filter(x=>x!==w.m).concat(allMeanings),ex:J(w.k)+(w.j?' '+J(w.j):'')+' = '+esc(w.m)});
-    add('vocab2',{id:'v2:w:'+w.k,q:'<b style="font-size:1.3rem">'+esc(w.m)+'</b>'+(w.j?' <span class="jp muted">'+esc(w.j)+'</span>':''),hint:'히라가나로 바르게 쓴 것은?',a:w.k,jp:1,d:WORDS2.map(x=>x.k).filter(x=>x!==w.k),trapD:traps(w.k),ex:J(w.k)+' — 박자 '+moraSplit(w.k).map(J).join('·'),typeable:1});
+    add('vocab2',{id:'v2:m:'+w.k,q:'<span class="jp big">'+esc(w.k)+'</span>'+(w.j?' <span class="jp muted">'+esc(w.j)+'</span>':''),hint:'뜻은?',a:w.m,d:m2.filter(x=>x!==w.m).concat(allMeanings).filter(x=>!(w.k==='もうします'&&(x==='말하다'||x==='하다'))),ex:J(w.k)+(w.j?' '+J(w.j):'')+' = '+esc(w.m)});
+    add('vocab2',{id:'v2:w:'+w.k,q:'<b style="font-size:1.3rem">'+esc(w.m)+'</b>'+(w.j?' <span class="jp muted">'+esc(w.j)+'</span>':''),hint:'히라가나로 바르게 쓴 것은?',a:w.k,jp:1,d:WORDS2.map(x=>x.k).filter(x=>x!==w.k),trapD:traps(w.k),ex:J(w.k)+' — 박자 '+moraDisp(w.k).map(J).join('·'),typeable:1});
   });
 
+  WORDS2.filter(w=>w.j).forEach(w=>{
+    add('kanji',{id:'kanji:r:'+w.j,q:'<span class="jp big">'+esc(w.j)+'</span>',hint:'읽는 법(히라가나)은?',a:w.k,jp:1,d:WORDS2.map(x=>x.k).concat(WORDS.map(x=>x.k)).filter(x=>x!==w.k),trapD:traps(w.k),ex:J(w.j)+' = '+J(w.k)+' '+esc(w.m),typeable:1});
+  });
   // 조사
   const pAll = PARTICLES.map(p=>p.p);
   PARTICLES.forEach(p=>{
     add('particle',{id:'part:use:'+p.p,q:'<b>'+esc(p.use.split(' · [')[0])+'</b>',hint:'이 뜻의 조사는?',a:p.p,jp:1,d:pAll.filter(x=>x!==p.p && !(p.no||[]).includes(x)),ex:J(p.p)+' — '+esc(p.use)+'<br>예) '+J(p.ex)+' — '+esc(p.exk),hot:1});
-    add('particle',{id:'part:fill:'+p.p,q:'<span class="jp big">'+esc(p.q)+'</span>',hint:esc(p.qk)+' — 빈칸에 들어갈 조사는?',a:p.p,jp:1,d:pAll.filter(x=>x!==p.p && !(p.no||[]).includes(x)),ex:J(p.ex)+' — '+esc(p.exk)+(p.read?'<br><b>읽기 주의:</b> 조사 '+J(p.p)+'는 ['+p.read+']':''),hot:1});
-    add('particle',{id:'part:mean:'+p.p,q:'<span class="jp huge">'+esc(p.p)+'</span>',hint:'조사의 쓰임은?',a:p.use.split(' · [')[0],d:PARTICLES.filter(x=>x.p!==p.p).map(x=>x.use.split(' · [')[0]),ex:J(p.p)+' — '+esc(p.use)+'<br>예) '+J(p.ex)+' — '+esc(p.exk)});
+    add('particle',{id:'part:fill:'+p.p,q:'<span class="jp big">'+esc(p.q)+'</span>',hint:esc(p.qk)+' — 빈칸에 들어갈 조사는?',a:p.p,jp:1,typeable:1,trapD:({'は':['わ'],'へ':['え'],'を':['お']})[p.p]||[],d:pAll.filter(x=>x!==p.p && !(p.no||[]).includes(x)).concat(({'は':['わ'],'へ':['え'],'を':['お']})[p.p]||[]),ex:J(p.ex)+' — '+esc(p.exk)+(p.read?'<br><b>읽기 주의:</b> 조사 '+J(p.p)+'는 ['+p.read+']':''),hot:1});
+    add('particle',{id:'part:mean:'+p.p,q:'<span class="jp huge">'+esc(p.p)+'</span>',hint:'조사의 쓰임은?',a:p.use.split(' · [')[0],d:PARTICLES.filter(x=>x.p!==p.p && !(p.no||[]).includes(x.p)).map(x=>x.use.split(' · [')[0]),ex:J(p.p)+' — '+esc(p.use)+'<br>예) '+J(p.ex)+' — '+esc(p.exk)});
   });
 
   // こそあど
@@ -696,15 +745,34 @@ function wordCard(w){
     add('kosoado',{id:'ks:k:'+j,q:'<span class="jp big">'+esc(j)+'</span>',hint:'뜻은?',a:k,d:ksAllK.filter(x=>x!==k),trapD:KOSOADO.rows.map(x=>x.w[ci][1]).filter(x=>x!==k),ex:ex});
   }));
 
+  // 요음: 소리 → 글자
+  YOON.forEach(([k,ro,ko])=>{
+    if(k[0]==='ぢ') return;
+    const big = k[0]+TO_BIG[k[1]];
+    const rowOthers = YOON.filter(x=>x[0][0]===k[0] && x[0]!==k).map(x=>x[0]);
+    add('kanaw',{id:'yw:'+k,q:'<b style="font-size:1.6rem">['+esc(ko)+']</b> <span class="muted">'+esc(ro)+'</span>',hint:'요음 — 이 소리의 히라가나는? (작은 글자 주의)',a:k,jp:1,typeable:1,alt:k[0]==='じ'?['ぢ'+k[1]]:[],
+      d:YOON.map(x=>x[0]).filter(x=>x!==k && x[0]!=='ぢ'),trapD:[big].concat(rowOthers),ex:'['+esc(ko)+'] = '+J(k)+' — 작은 '+J(k[1])+'! 크게 쓰면 '+J(big)+' (두 박).'});
+  });
+  // 50음도 행·단
+  const DAN = ['あ단','い단','う단','え단','お단'];
+  GOJUON_LAYOUT.forEach(col=>col.forEach((k,di)=>{
+    if(!k || k==='ん') return;
+    const gyo = col[0]+'행';
+    add('kanaw',{id:'gd:k:'+k,q:'<b style="font-size:1.4rem">'+J(gyo)+' '+esc(DAN[di])+'</b>',hint:'50음도 빈칸 — 들어갈 글자는?',a:k,jp:1,typeable:1,
+      d:SEION.map(x=>x[0]).filter(x=>x!==k && !(k==='を'&&x==='お') && !(k==='お'&&x==='を')),trapD:col.filter(x=>x&&x!==k).concat(GOJUON_LAYOUT.map(c=>c[di]).filter(x=>x&&x!==k)),ex:J(gyo)+' : '+col.filter(Boolean).map(J).join(' ')});
+    if(['け','せ','て','ね','へ','め','れ','こ','そ','と','の','ほ','も','よ','ろ','き','し','ち','に','ひ','み','り'].includes(k))
+      add('kanaw',{id:'gd:d:'+k,q:'<span class="jp huge">'+esc(k)+'</span>',hint:'몇 단? (장음·요음 규칙에 필요)',a:DAN[di],d:DAN.filter(x=>x!==DAN[di]),ex:J(k)+'는 '+esc(DAN[di])+(di===3?' → 장음은 い를 붙여요.':di===4?' → 장음은 う를 붙여요.':di===1?' → 요음(작은 ゃゅょ)이 붙을 수 있어요.':'')});
+  }));
   // 인사말: 퍼즐
   const gAll = uniq(PUZZLE_ANS.map(x=>x.w).concat(SONG.filter(s=>!s.kata).map(s=>s.jp)));
   PUZZLE_ANS.forEach(p=>{
-    add('greet',{id:'g:sit:'+p.w,q:'<b>'+esc(p.sit)+'</b>',hint:'알맞은 인사말은?',a:p.w,jp:1,d:gAll.filter(x=>x!==p.w),ex:J(p.w)+' ['+esc(p.read)+']'+(p.polite?' → 정중형 '+J(p.polite)+(p.pk?' '+esc(p.pk):''):''),hot:1,typeable:1});
+    add('greet',{id:'g:sit:'+p.w,q:'<b>'+esc(p.sit)+'</b>',hint:'알맞은 인사말은?',a:p.w,jp:1,alt:p.alt||[],d:gAll.filter(x=>x!==p.w && !(p.w==='ありがとう'&&x==='すみません')),ex:J(p.w)+' ['+esc(p.read)+']'+(p.polite?' → 정중형 '+J(p.polite)+(p.pk?' '+esc(p.pk):''):''),hot:1,typeable:1});
     if(p.polite) add('greet',{id:'g:pol:'+p.w,q:'<span class="jp big">'+esc(p.w)+'</span>',hint:'정중형으로 늘려 쓰면?',a:p.polite,jp:1,
       d:PUZZLE_ANS.filter(x=>x.polite&&x.w!==p.w).map(x=>x.polite).concat([p.w+'です', p.w+'なさい', p.w+'ございます'].filter(x=>x!==p.polite)),
       trapD:[p.w+'です', p.w==='おやすみ'?'おやすみございます':p.w+'なさい'].filter(x=>x!==p.polite),
-      ex:J(p.w)+' → '+J(p.polite),hot:1});
+      ex:J(p.w)+' → '+J(p.polite),hot:1,typeable:1});
   });
+  add('greet',{id:'g:pol:ひさしぶり',q:'<span class="jp big">ひさしぶり</span>',hint:'정중형으로 늘려 쓰면?',a:'おひさしぶりです',jp:1,d:['ひさしぶりございます','おひさしぶりなさい','ひさしぶりです','おひさしぶりございます'],trapD:['ひさしぶりです'],ex:J('ひさしぶり')+' (오래간만이다) → '+J('おひさしぶりです')+' (오랜만이에요)',typeable:1});
   // 인사송
   const EQUIV = [['ごめんなさい','すみません','もうしわけありません','もうしわけございません'],['ありがとう','どうも','ありがとうございます','どうもありがとうございます']];
   const k0 = x => kanaOnly(x);
@@ -713,69 +781,95 @@ function wordCard(w){
   const songKo = uniq(songLines.map(s=>s.ko));
   songLines.forEach((s,i)=>{
     if(i===3) return; // こんにちは 반복
-    add('greet',{id:'g:song:m:'+s.jp,q:'<span class="jp big">'+esc(s.jp)+'</span>',hint:'뜻은?',a:s.ko,d:songKo.filter(x=>x!==s.ko && !songLines.some(l=>l.ko===x && sameMeaning(l.jp,s.jp))),ex:J(s.jp)+' ['+esc(s.read)+'] — '+esc(s.ko)+(s.n&&s.n!=='가나'?' <span class="tmark">빈칸 '+s.n+'</span>':'')});
+    add('greet',{id:'g:song:m:'+s.jp,q:'<span class="jp big">'+esc(s.jp)+'</span>',hint:'뜻은?',a:s.ko,d:songKo.filter(x=>x!==s.ko && !songLines.some(l=>l.ko===x && sameMeaning(l.jp,s.jp)) && !(s.jp==='すみません'&&x==='감사합니다')),ex:J(s.jp)+' ['+esc(s.read)+'] — '+esc(s.ko)+(s.n&&s.n!=='가나'?' <span class="tmark">빈칸 '+s.n+'</span>':'')});
     add('greet',{id:'g:song:j:'+s.jp,q:'<b style="font-size:1.25rem">'+esc(s.ko)+'</b>',hint:'인사송 가사 — 일본어로?',a:s.jp,jp:1,d:songLines.map(x=>x.jp).filter(x=>x!==s.jp && !sameMeaning(x,s.jp)),trapD:traps(s.jp).slice(0,6),ex:J(s.jp)+' ['+esc(s.read)+']',hot:s.n&&s.n!=='가나'?1:0,typeable:1});
   });
   const blanks = SONG.filter(s=>s.n && s.n!=='가나');
   blanks.forEach(s=>{
     add('greet',{id:'g:blank:'+s.n,q:'<b>인사송 빈칸 '+esc(s.n)+'</b>',hint:'뜻: '+esc(s.ko),a:s.jp,jp:1,d:blanks.map(x=>x.jp).filter(x=>x!==s.jp),ex:blanks.map(x=>esc(x.n)+' '+J(x.jp)).join(' · '),typeable:1});
   });
-  [['いってきます','いってらっしゃい','나가는 사람 ↔ 보내는 사람'],['ありがとう','どういたしまして','감사 ↔ 천만에요'],['はい','いいえ','네 ↔ 아니요'],['ごめんなさい','かまいませんよ','사과 ↔ 괜찮아요'],['すみません','かまいませんよ','사과 ↔ 괜찮아요'],['ただいま','おかえりなさい','다녀왔습니다 ↔ 안녕히 다녀오셨어요']].forEach(([a,b,why])=>{
-    add('greet',{id:'g:pair:'+a,q:'A: '+J(a)+'<br>B: ＿＿＿＿',hint:'B가 대답할 말은?',a:b,jp:1,d:['いってらっしゃい','どういたしまして','いいえ','かまいませんよ','おかえりなさい','ただいま','いってきます','ごちそうさまでした'].filter(x=>x!==b&&x!==a),ex:J(a)+' ↔ '+J(b)+' — '+esc(why),hot:1});
+  const PAIRD = ['いってらっしゃい','どういたしまして','いいえ','かまいませんよ','おかえりなさい','ただいま','いってきます','ごちそうさまでした','いただきます','もしもし'];
+  [['いってきます','いってらっしゃい','나가는 사람 ↔ 보내는 사람',[]],['ありがとう','どういたしまして','감사 ↔ 천만에요',['いいえ']],['ごめんなさい','かまいませんよ','사과 ↔ 괜찮아요',['いいえ']],['すみません','かまいませんよ','사과 ↔ 괜찮아요',['いいえ','どういたしまして']],['ただいま','おかえりなさい','다녀왔습니다 ↔ 안녕히 다녀오셨어요',[]]].forEach(([a,b,why,no])=>{
+    add('greet',{id:'g:pair:'+a,q:'A: '+J(a)+'<br>B: ＿＿＿＿',hint:'B가 대답할 말은?',a:b,jp:1,typeable:1,d:PAIRD.filter(x=>x!==b&&x!==a&&!no.includes(x)),ex:J(a)+' ↔ '+J(b)+' — '+esc(why),hot:1});
+  });
+  [['いってらっしゃい','いってきます','나가는 사람이 먼저 いってきます'],['おかえりなさい','ただいま','돌아온 사람이 먼저 ただいま'],['どういたしまして','ありがとう','감사 인사에 대한 대답']].forEach(([b,a,why])=>{
+    add('greet',{id:'g:pairr:'+b,q:'A: ＿＿＿＿<br>B: '+J(b),hint:'A가 먼저 한 말은?',a:a,jp:1,typeable:1,d:PAIRD.filter(x=>x!==a&&x!==b&&!(b==='どういたしまして'&&x==='すみません')),ex:J(a)+' → '+J(b)+' — '+esc(why),hot:1});
+  });
+  add('greet',{id:'g:opp:はい',q:'<b>'+J('はい')+' (네)</b>의 반대말은?',hint:'',a:'いいえ',jp:1,typeable:1,d:['どういたしまして','かまいませんよ','ただいま','もしもし'],ex:J('はい')+' (네) ↔ '+J('いいえ')+' (아니요) — 장음: いいえ [이-에]',hot:1});
+  [['집을 나설 때','いってきます'],['집에 돌아왔을 때','ただいま'],['전화를 걸거나 받을 때','もしもし'],['모르겠을 때','わかりません'],['알았을 때','わかりました'],['오래간만에 만났을 때 (반말)','ひさしぶり']].forEach(([sit,a])=>{
+    add('greet',{id:'g:sit2:'+a,q:'<b>'+esc(sit)+'</b>',hint:'알맞은 말은? (인사송)',a:a,jp:1,typeable:1,d:['いってらっしゃい','おかえりなさい','いってきます','ただいま','もしもし','わかりません','わかりました','ひさしぶり','またこんど'].filter(x=>x!==a),ex:J(a)+' — '+esc((songLines.find(l=>l.jp===a)||{ko:''}).ko)});
   });
 
   // あいさつ · 수업 · 소개
-  const aJ = AISATSU.map(x=>x.jp).filter(x=>x.indexOf('A:')<0);
-  const aK = uniq(AISATSU.map(x=>x.ko));
-  AISATSU.forEach(x=>{
-    if(x.jp.indexOf('A:')===0) return;
+  const AQ = AISATSU.flatMap(x=>x.jp.indexOf('A:')===0 ? (x.n==='(11)' ? [{n:'(11)',jp:'いってきます。',ko:'다녀오겠습니다.'},{n:'(11)',jp:'いってらっしゃい。',ko:'안녕히 다녀오세요.'}] : [{n:'(12)',jp:'ただいま。',ko:'다녀왔습니다.'},{n:'(12)',jp:'おかえりなさい。',ko:'안녕히 다녀오셨어요.'}]) : [x]);
+  const aJ = AQ.map(x=>x.jp);
+  const aK = uniq(AQ.map(x=>x.ko));
+  AQ.forEach(x=>{
     add('aisatsu',{id:'as:k:'+x.jp,q:'<span class="jp big">'+esc(x.jp)+'</span>',hint:'뜻은?',a:x.ko,d:aK.filter(y=>y!==x.ko && !(y.indexOf('안녕하세요')===0 && x.ko.indexOf('안녕하세요')===0)),ex:J(x.jp)+' — '+esc(x.ko)+(x.time?' · '+J(x.time):'')+(x.same?'<br>같은 뜻: '+x.same.map(J).join(' / '):'')});
-    add('aisatsu',{id:'as:j:'+x.jp,q:'<b style="font-size:1.2rem">'+esc(x.ko)+'</b>',hint:'일본어로?',a:x.jp,jp:1,alt:(x.same||[]).map(y=>y.replace(/\s*\(.*\)/,'')),d:aJ.filter(y=>y!==x.jp),ex:J(x.jp)+(x.kj?'<br>'+J(x.kj):''),typeable:1});
+    add('aisatsu',{id:'as:j:'+x.jp,q:'<b style="font-size:1.2rem">'+esc(x.ko)+'</b>',hint:'일본어로?',a:x.jp,jp:1,alt:(x.same||[]).map(y=>y.replace(/\s*\(.*\)/,'')).concat(x.jp==='こんにちは。'?[]:[]),d:aJ.filter(y=>y!==x.jp),trapD:x.jp==='こんにちは。'?['こんにちわ。']:x.jp==='こんばんは。'?['こんばんわ。']:[],ex:J(x.jp)+(x.kj?'<br>'+J(x.kj):''),typeable:1});
   });
-  add('aisatsu',{id:'as:time:asa',q:'<b>朝(あさ) 아침</b>에 하는 "안녕하세요"',hint:'',a:'おはようございます',jp:1,d:['こんにちは','こんばんは','おやすみなさい'],ex:'朝 아침 → おはようございます · 昼 낮 → こんにちは · 夜 밤 → こんばんは',hot:1});
-  add('aisatsu',{id:'as:time:hiru',q:'<b>昼(ひる) 낮</b>에 하는 "안녕하세요"',hint:'',a:'こんにちは',jp:1,d:['おはようございます','こんばんは','おやすみなさい'],ex:'朝 → おはようございます · 昼 → こんにちは · 夜 → こんばんは',hot:1});
-  add('aisatsu',{id:'as:time:yoru',q:'<b>夜(よる) 밤</b>에 하는 "안녕하세요"',hint:'',a:'こんばんは',jp:1,d:['おはようございます','こんにちは','おやすみなさい'],ex:'朝 → おはようございます · 昼 → こんにちは · 夜 → こんばんは. 잠자기 전 인사는 おやすみなさい.',hot:1});
+  add('aisatsu',{id:'as:time:asa',q:'<b>朝(あさ) 아침</b>에 하는 "안녕하세요"',hint:'',a:'おはようございます',jp:1,d:['こんにちは','こんばんは','おやすみなさい'],ex:'朝 아침 → おはようございます · 昼 낮 → こんにちは · 夜 밤 → こんばんは',hot:1,typeable:1});
+  add('aisatsu',{id:'as:time:hiru',q:'<b>昼(ひる) 낮</b>에 하는 "안녕하세요"',hint:'',a:'こんにちは',jp:1,typeable:1,trapD:['こんにちわ'],d:['おはようございます','こんばんは','おやすみなさい','こんにちわ'],ex:'朝 → おはようございます · 昼 → こんにちは · 夜 → こんばんは',hot:1});
+  add('aisatsu',{id:'as:time:yoru',q:'<b>夜(よる) 밤</b>에 하는 "안녕하세요"',hint:'',a:'こんばんは',jp:1,typeable:1,trapD:['こんばんわ'],d:['おはようございます','こんにちは','おやすみなさい','こんばんわ'],ex:'朝 → おはようございます · 昼 → こんにちは · 夜 → こんばんは. 잠자기 전 인사는 おやすみなさい.',hot:1});
   add('aisatsu',{id:'as:same:arigato',q:'"감사합니다"의 뜻이 <u>아닌</u> 것은?',hint:'',a:'ごめんなさい',jp:1,d:['どうも','ありがとう','ありがとうございます','どうもありがとうございます'],ex:'どうもありがとうございます = ありがとうございます = ありがとう = どうも. ごめんなさい는 미안합니다.',hot:1});
   add('aisatsu',{id:'as:same:gomen',q:'"미안합니다·죄송합니다"의 뜻이 <u>아닌</u> 것은?',hint:'',a:'どういたしまして',jp:1,d:['すみません','もうしわけありません','もうしわけございません'],ex:'ごめんなさい = すみません = もうしわけありません = もうしわけございません. どういたしまして는 천만에요.',hot:1});
   add('aisatsu',{id:'as:eat:before',q:'밥 먹기 <b>전</b>에 하는 말',hint:'',a:'いただきます',jp:1,d:['ごちそうさまでした','おかえりなさい','おやすみなさい'],ex:'먹기 전 いただきます (잘 먹겠습니다) ↔ 먹은 후 ごちそうさまでした (잘 먹었습니다)',hot:1,typeable:1});
   add('aisatsu',{id:'as:eat:after',q:'밥 먹은 <b>후</b>에 하는 말',hint:'',a:'ごちそうさまでした',jp:1,d:['いただきます','どういたしまして','おめでとうございます'],ex:'먹기 전 いただきます ↔ 먹은 후 ごちそうさまでした',hot:1,typeable:1});
-  add('aisatsu',{id:'as:newyear',q:'"새해 복 많이 받으세요"',hint:'',a:'あけましておめでとうございます',jp:1,d:['おたんじょうびおめでとうございます','おひさしぶりです','おめでとう'],ex:'あけまして おめでとう ございます',hot:1});
-  add('aisatsu',{id:'as:bday',q:'"생일 축하합니다"',hint:'',a:'おたんじょうびおめでとうございます',jp:1,d:['あけましておめでとうございます','おめでとう','どうもありがとうございます'],ex:'お誕生日(たんじょうび) おめでとう ございます',hot:1});
+  add('aisatsu',{id:'as:newyear',q:'"새해 복 많이 받으세요"',hint:'',a:'あけましておめでとうございます',jp:1,d:['おたんじょうびおめでとうございます','おひさしぶりです','ごちそうさまでした'],ex:'あけまして おめでとう ございます',hot:1,typeable:1});
+  add('aisatsu',{id:'as:bday',q:'"생일 축하합니다"',hint:'',a:'おたんじょうびおめでとうございます',jp:1,d:['あけましておめでとうございます','おやすみなさい','どうもありがとうございます'],ex:'お誕生日(たんじょうび) おめでとう ございます',hot:1,typeable:1});
+  add('aisatsu',{id:'as:moushiwake1',q:'<span class="jp big">もうしわけ ありません。</span>',hint:'뜻은?',a:'면목 없습니다 (죄송합니다)',d:['천만에요.','괜찮아요','잘 먹었습니다.','오랜만이에요.'],ex:'ごめんなさい = すみません = もうしわけありません = もうしわけございません'});
+  add('aisatsu',{id:'as:moushiwake2',q:'<span class="jp big">もうしわけ ございません。</span>',hint:'뜻은?',a:'송구합니다 (죄송합니다)',d:['천만에요.','괜찮아요','잘 먹겠습니다.','새해 복 많이 받으세요.'],ex:'もうしわけ ございません이 가장 정중한 사과.'});
   // 소개
   add('aisatsu',{id:'in:moushimasu',q:'わたしは ○○○（　）もうします。',hint:'저는 ○○○라고 합니다 — 빈칸은?',a:'と',jp:1,d:['は','を','の','に'],ex:'私(わたし)は○○○と申(もう)します. と = ~라고 (인용).',hot:1});
-  add('aisatsu',{id:'in:desu',q:'わたし（　）○○○です。',hint:'저는 ○○○입니다 — 빈칸은?',a:'は',jp:1,d:['と','を','の','に'],ex:'わたしは [와타시와] — 조사 は는 [와].',hot:1});
+  add('aisatsu',{id:'in:desu',q:'わたし（　）○○○です。',hint:'저는 ○○○입니다 — 빈칸은?',a:'は',jp:1,typeable:1,trapD:['わ'],d:['わ','と','を','の','に'],ex:'わたしは [와타시와] — 조사 は는 [와]로 읽어도 글자는 は.',hot:1});
+  add('aisatsu',{id:'in:self',q:'자기소개 3문장 (이름 = ○○○)',hint:'바르게 쓴 것은?',a:'はじめまして。わたしは ○○○です。どうぞ よろしく おねがいします。',jp:1,d:['はじめまして。わたしわ ○○○です。どうぞ よろしく おねがいします。','はじめまして。わたしは ○○○です。どうぞ よろしく おねかいします。','はじめまして。わたしは ○○○さんです。どうぞ よろしく おねがいします。'],fixed:1,ex:'わたしは(와) · 자기 이름에 さん ✕ · おねがい(が) — 더 정중하게: わたしは ○○○と もうします。',hot:1});
+  add('aisatsu',{id:'in:other',q:'친구 ○○○를 소개하기',hint:'이쪽은 ○○○씨입니다',a:'こちらは ○○○さんです。',jp:1,d:['こちらわ ○○○さんです。','これは ○○○さんです。','こちらは ○○○です。さん'],fixed:1,ex:'こちら(이쪽) + は(와) + 이름 + さん',hot:1});
+  [['じゅぎょうを（　　　　）。','はじめます','수업을 시작하겠습니다.',['おわります','とります','します']],['しゅっせきを（　　　）。','とります','출석을 부르겠습니다.',['はじめます','よみます','いいます']],['きょうの じゅぎょうは（　　）までです。','ここ','오늘 수업은 여기까지입니다.',['そこ','あそこ','これ']],['みなさん、おつかれ（　　）でした。','さま','여러분, 수고하셨습니다.',['さん','ちゃん','ます']]].forEach(([q,a,ko,d],i)=>{
+    add('aisatsu',{id:'cl:fill:'+i,q:'<span class="jp big">'+esc(q)+'</span>',hint:esc(ko)+' — 빈칸은?',a:a,jp:1,d:d,fixed:1,typeable:1,ex:J(q.replace(/（\s*）|（　+）/,a))+' — '+esc(ko)});
+  });
   add('aisatsu',{id:'in:yoroshiku',q:'どうぞ よろしく（　　　　　）。',hint:'잘 부탁드립니다 — 빈칸은?',a:'おねがいします',jp:1,d:['ございます','もうします','なさい'],ex:'どうぞ よろしく おねがいします。',typeable:1,hot:1});
   add('aisatsu',{id:'in:kochira',q:'（　　　）は ○○○さんです。',hint:'이쪽은 ○○○씨입니다 — 빈칸은? (타인 소개)',a:'こちら',jp:1,d:['これ','ここ','この'],ex:'こちらは ○○○さんです。 こちら = 이쪽 (사람을 소개할 때 정중하게).',hot:1,typeable:1});
   add('aisatsu',{id:'in:san',q:'こちらは ○○○（　　）です。',hint:'이쪽은 ○○○<b>씨</b>입니다',a:'さん',jp:1,d:['さま','せんせい','ちゃん'],ex:'さん = ~씨. 자기 이름에는 붙이지 않아요.'});
   add('aisatsu',{id:'in:first',q:'자기소개 첫 마디 "처음 뵙겠습니다"',hint:'',a:'はじめまして',jp:1,d:['おひさしぶりです','こんにちは','よろしく'],ex:'はじめまして。 → わたしは ○○○です。 → どうぞ よろしく おねがいします。',hot:1,typeable:1});
   const cJ = CLASS.map(c=>c.jp), cK = CLASS.map(c=>c.ko);
   CLASS.forEach(c=>{
-    add('aisatsu',{id:'cl:k:'+c.n,q:'<span class="jp big">'+esc(c.jp)+'</span>',hint:'수업 때 쓰는 표현 — 뜻은?',a:c.ko,d:cK.filter(x=>x!==c.ko).concat(aK),ex:J(c.jp)+(c.kj?'<br>'+J(c.kj):'')+'<br>'+esc(c.ko)});
-    add('aisatsu',{id:'cl:j:'+c.n,q:'<b>'+esc(c.ko)+'</b>',hint:'수업 때 쓰는 표현 — 일본어로?',a:c.jp,jp:1,d:cJ.filter(x=>x!==c.jp),ex:J(c.jp)+(c.kj?'<br>'+J(c.kj):'')});
+    add('aisatsu',{id:'cl:k:'+c.n,q:'<span class="jp big">'+esc(c.jp)+'</span>',hint:'수업 때 쓰는 표현 — 뜻은?',a:c.ko,d:cK.filter(x=>x!==c.ko).concat(aK.filter(y=>c.ko.indexOf(y.replace(/[.。]$/,''))<0)),ex:J(c.jp)+(c.kj?'<br>'+J(c.kj):'')+'<br>'+esc(c.ko)});
+    add('aisatsu',{id:'cl:j:'+c.n,q:'<b>'+esc(c.ko)+'</b>',hint:'수업 때 쓰는 표현 — 일본어로?',a:c.jp,jp:1,typeable:1,alt:c.n==='(6)'?['じゃ、また。','じゃ、ね。','また、ね。','また、あした。']:[],d:cJ.filter(x=>x!==c.jp),ex:J(c.jp)+(c.kj?'<br>'+J(c.kj):'')});
   });
 
   // 요일
   YOUBI.forEach(y=>{
-    add('youbi',{id:'yb:r:'+y.j,q:'<span class="jp big">'+esc(y.j)+'</span>',hint:'읽는 법은?',a:y.k,jp:1,d:YOUBI.map(x=>x.k).filter(x=>x!==y.k),trapD:traps(y.k).concat(y.k==='なんようび'?['なにようび']:[]).filter(x=>!YOUBI.some(z=>z.k===x)),ex:J(y.j)+' = '+J(y.k)+' '+esc(y.m),typeable:1,hot:y.k==='なんようび'?1:0});
+    add('youbi',{id:'yb:r:'+y.j,q:'<span class="jp big">'+esc(y.j)+'</span>',hint:'읽는 법은?',a:y.k,jp:1,d:YOUBI.map(x=>x.k).filter(x=>x!==y.k),trapD:traps(y.k).filter(x=>!YOUBI.some(z=>z.k===x)),ex:J(y.j)+' = '+J(y.k)+' '+esc(y.m),typeable:1,hot:y.k==='なんようび'?1:0});
     add('youbi',{id:'yb:m:'+y.j,q:'<b style="font-size:1.3rem">'+esc(y.m)+'</b>',hint:'히라가나로?',a:y.k,jp:1,d:YOUBI.map(x=>x.k).filter(x=>x!==y.k),trapD:traps(y.k).filter(x=>!YOUBI.some(z=>z.k===x)),ex:J(y.j)+' = '+J(y.k),typeable:1});
     add('youbi',{id:'yb:k:'+y.j,q:'<span class="jp big">'+esc(y.j)+'</span>',hint:'무슨 요일?',a:y.m,d:YOUBI.map(x=>x.m).filter(x=>x!==y.m),ex:J(y.j)+' = '+esc(y.m)});
   });
 
   // 개념
-  CONCEPT.forEach((c,i)=>add(c.g,{id:'c:'+c.g+':'+i,q:'<b>'+c.q.replace(/[ぁ-ゖ゛゜ー]+/g,m=>J(m))+'</b>',hint:'',a:c.a,jp:c.jp?1:0,d:c.d,ex:esc(c.ex).replace(/[ぁ-ゖ゛゜ー]+/g,m=>J(m)),hot:c.hot?1:0,fixed:1}));
+  CONCEPT.forEach((c,i)=>add(c.g,{id:'c:'+c.g+':'+i,q:'<b>'+c.q.replace(/[ぁ-ゖ゛゜ー]+/g,m=>J(m))+'</b>',hint:'',a:c.a,jp:c.jp?1:0,d:c.d,ex:esc(c.ex).replace(/[ぁ-ゖ゛゜ー]+/g,m=>J(m)),hot:c.hot?1:0,fixed:1,typeable:c.typeable?1:0}));
 
   // 읽는 법
   PRON.forEach(p=>{
     add('pron',{id:'pr:'+p.w,q:'<span class="jp big">'+esc(p.w)+'</span>',hint:'바르게 읽은 것은?',a:p.r,d:p.d,ex:J(p.w)+' = ['+esc(p.r)+'] — '+esc(p.why),hot:1,fixed:1});
   });
 
+  // 발음 보고 히라가나 쓰기 (학습지 형식)
+  const spellSrc = [];
+  SONG.filter(s=>!s.kata).forEach(s=>spellSrc.push([s.read,s.jp,s.ko]));
+  PUZZLE_ANS.forEach(p=>spellSrc.push([p.read,p.w,p.sit]));
+  PRON.filter(p=>p.w.indexOf(' ')<0).forEach(p=>spellSrc.push([p.r,p.w,'']));
+  const seenSp = new Set();
+  spellSrc.forEach(([r,jp,ko])=>{
+    if(seenSp.has(jp)) return; seenSp.add(jp);
+    const extra = jp==='こんにちは'?['こんにちわ']:jp==='こんばんは'?['こんばんわ']:jp==='わたしは'?['わたしわ']:[];
+    add('spell',{id:'sp:'+jp,q:'<b style="font-size:1.5rem">['+esc(r)+']</b>',hint:'발음을 보고 히라가나로'+(ko?' (뜻: '+esc(ko)+')':''),a:jp,jp:1,typeable:1,d:spellSrc.map(x=>x[1]).filter(x=>x!==jp),trapD:extra.concat(traps(jp)),ex:'['+esc(r)+'] = '+J(jp)+' — 박자 '+moraDisp(jp).map(J).join('·'),hot:1});
+  });
   // 박자 세기
   const moraWords = uniq(WORDS.map(w=>w.k).filter(k=>/[ゃゅょっ]|おう|こう|そう|とう|のう|ほう|もう|よう|ろう|ごう|どう|けい|せい|えい|いい|うう|ん/.test(k))
     .concat(['とけい','こうこう','さとう','ありがとう','おはよう','いってきます','いってらっしゃい','きって','がっこう','びょういん','びよういん','きょう','きよう','おかあさん','いいえ','ききょうじょし','じゅぎょう','しゅっせき','たんじょうび','おめでとう','せんせい','ごちそうさまでした']));
   moraWords.forEach(k=>{
     const n = moraCount(k);
     const d = uniq([n-1,n+1,n+2,n-2,n+3].filter(x=>x>0 && x!==n)).slice(0,4).map(x=>x+'박');
-    add('mora',{id:'mo:'+k,q:'<span class="jp big">'+esc(k)+'</span>',hint:'몇 박?',a:n+'박',d:d,ex:moraSplit(k).map(J).join(' · ')+' = <b>'+n+'박</b><br><span class="small muted">작은 ゃゅょ는 앞 글자와 한 박, 작은 っ와 장음은 각각 한 박.</span>',fixed:1});
+    add('mora',{id:'mo:'+k,q:'<span class="jp big">'+esc(k)+'</span>',hint:'몇 박?',a:n+'박',d:d,ex:moraDisp(k).map(J).join(' · ')+' = <b>'+n+'박</b><br><span class="small muted">작은 ゃゅょ는 앞 글자와 한 박, 작은 っ와 장음(ー)은 각각 한 박.</span>',fixed:1});
   });
 })();
 
@@ -789,7 +883,7 @@ function record(id, ok){
   const p = PROG[id] || {b:0,c:0,w:0};
   if(ok){ p.b = Math.min(5, p.b+1); p.c++; } else { p.b = 0; p.w++; p.lw = Date.now(); }
   PROG[id] = p; store.set('prog', PROG);
-  const day = new Date().toISOString().slice(0,10);
+  const day = ymd();
   const st = store.get('stats', {}); st[day] = (st[day]||0)+1; store.set('stats', st);
 }
 const mastered = id => boxOf(id) >= 3;
@@ -817,6 +911,7 @@ function deckStats(id){
    OPTIONS
    ========================================================= */
 function buildOptions(it){
+  if(it.deck==='mora'){ const n=parseInt(it.a,10); const k=Math.floor(Math.random()*(Math.min(3,n-1)+1)); const o=[]; for(let x=n-k;o.length<4;x++) o.push(x+'박'); return shuffle(o); }
   if(it.fixed) return shuffle([it.a].concat(it.d.slice(0,3)));
   const bad = new Set([it.a].concat(it.alt||[]));
   const t = uniq((it.trapD||[]).filter(x=>!bad.has(x)));
@@ -860,7 +955,7 @@ function viewHome(){
   const examDate = store.get('examDate','');
   let dd = '';
   if(examDate){ const diff = Math.ceil((new Date(examDate+'T00:00:00') - new Date(new Date().toDateString()))/86400000); dd = diff>0?'D-'+diff:(diff===0?'D-DAY':'끝'); }
-  const st = store.get('stats',{}); const today = st[new Date().toISOString().slice(0,10)]||0;
+  const st = store.get('stats',{}); const today = st[ymd()]||0;
   const groups = uniq(DECKS.map(d=>d.group));
   app.innerHTML = header('정리본 13쪽 + 원본 프린트 4쪽 전부 · 히라가나 범위 문제 '+total+'개') +
   '<div class="stack">'+
@@ -885,7 +980,9 @@ function viewHome(){
    '</section>'+
    '<p class="small muted">진도는 이 브라우저에만 저장돼요. 다른 기기에서는 처음부터 시작해요.</p>'+
   '</div>';
-  $('#examDate').addEventListener('change', e=>{ store.set('examDate', e.target.value); viewHome(); });
+  const paintStamp = v => { const st=$('.hero .stamp'); if(!st) return; if(!v){ st.innerHTML='<span>날짜<br>설정</span>'; return; } const diff=Math.ceil((new Date(v+'T00:00:00') - new Date(new Date().toDateString()))/86400000); st.innerHTML='<span>시험<b>'+(diff>0?'D-'+diff:(diff===0?'D-DAY':'끝'))+'</b></span>'; };
+  const saveDate = e=>{ const v=e.target.value; if(v && +v.slice(0,4)<2025) return; store.set('examDate', v); paintStamp(v); };
+  ['input','change','blur'].forEach(ev=>$('#examDate').addEventListener(ev, saveDate));
   $$('.start').forEach(b=>b.addEventListener('click',()=>{
     const g=b.dataset.go;
     if(g==='daily') startQuiz(weightedPick(ITEMS.filter(inScope),30),'mc','오늘의 30문제');
@@ -933,10 +1030,12 @@ function noteBody(s){
   if(s==='gojuon'){
     const cell = k => { if(!k) return '<button class="blank" tabindex="-1" aria-hidden="true"></button>'; const f=SEION.concat(DAKU,HANDAKU).find(x=>x[0]===k); return '<button type="button" data-k="'+k+'">'+J(k)+'<span class="r">'+esc(f[2])+' '+esc(f[1])+'</span></button>'; };
     return '<h2>50음도 <span class="jp">五十音図</span></h2>'+
-     '<p class="small muted" style="margin-bottom:8px">글자를 누르면 그 글자로 끝나는 단어표 단어가 나와요. 읽기 칸은 "읽기 가리기"로 숨길 수 있어요.</p>'+
-     '<div class="row" style="margin-bottom:10px"><button class="chip" id="hideRead" aria-pressed="false" type="button">읽기 가리기</button></div>'+
-     '<h3>청음 46자</h3><div class="gojuon" id="g1">'+GOJUON_LAYOUT.map(r=>r.map(cell).join('')).join('')+'</div>'+
+     '<p class="small muted" style="margin-bottom:8px">글자를 누르면 그 글자가 들어간 단어표 단어가 아래에 나와요. "읽기 가리기"를 켜면 누른 칸만 읽기가 보여요.</p>'+
+     '<div class="row" style="margin-bottom:10px"><button class="chip" id="hideRead" aria-pressed="false" type="button">읽기 가리기</button><button class="chip" id="hideKana" aria-pressed="false" type="button">글자 가리기 (종이에 50음도 쓰기)</button></div>'+
+     '<h3>청음 46자</h3><div class="gojuon dan" aria-hidden="true">'+['あ단','い단','う단','え단','お단'].map(x=>'<span class="tiny muted" style="text-align:center">'+x+'</span>').join('')+'</div><div class="gojuon" id="g1">'+GOJUON_LAYOUT.map(r=>r.map(cell).join('')).join('')+'</div>'+
+     '<p class="small muted" style="margin-top:6px">가로 한 줄 = 한 행 (あ행·か행…), 세로 한 줄 = 한 단. 장음 규칙(え단+い, お단+う)과 요음(い단 + ゃゅょ)이 이 단으로 정해져요.</p>'+
      '<div id="kinfo" class="callout ai" style="margin-top:10px" hidden></div>'+
+     '<div class="callout" style="margin-top:10px"><b>ん 발음 4종류 (선생님 메모)</b><ul class="tight"><li>ま·ば·ぱ행 앞 → [ㅁ] '+J('こんばんは')+' 콤방와</li><li>さ·た·な·ら행 앞 → [ㄴ] '+J('こんにちは')+' 콘니치와 · '+J('せんせい')+' 센세-</li><li>か·が행 앞 → [ㅇ] '+J('かんこく')+' 캉코쿠</li><li>단어 끝 → 콧소리 [ㅇ에 가까움] '+J('ほん')+' 홍 · '+J('すみません')+' 스미마셍</li></ul></div>'+
      '<h3>탁음 ゛ 20개 · 반탁음 ゜ 5개</h3><div class="gojuon">'+DAKU.concat(HANDAKU).map(x=>cell(x[0])).join('')+'</div>'+
      '<h3>요음 (작은 ゃ ゅ ょ)</h3><div class="gojuon y3">'+YOON.map(x=>'<button type="button" data-y="'+x[0]+'">'+J(x[0])+'<span class="r">'+esc(x[2])+' '+esc(x[1])+'</span></button>').join('')+'</div>'+
      '<div class="callout" style="margin-top:12px"><b>요음 개수 주의</b> — 정리본은 21 + 15 = 36개(ぢゃ ぢゅ ぢょ 포함), 교과서 표에는 ぢゃ 줄이 없어 33개예요. 개수를 묻는 문제가 나오면 선생님이 수업에서 말한 숫자를 따르세요.</div>'+
@@ -946,7 +1045,7 @@ function noteBody(s){
     const rows = []; const order = SEION.map(x=>x[0]);
     const groups = [['あ행','あいうえお'],['か행','かきくけこ'],['さ행','さしすせそ'],['た행','たちつてと'],['な행','なにぬねの'],['は행','はひふへほ'],['ま행','まみむめも'],['や행','やゆよ'],['ら행','らりるれろ'],['わ·を·ん','わをん']];
     return '<h2>단어 총정리 <span class="jp">単語</span></h2>'+
-     '<p class="small muted" style="margin-bottom:8px">46행 전체 · 가타카나 제외 · <span style="color:var(--shu)">★</span> = 조사로도 쓰는 글자 · <span class="tmark">선생님 표시</span> = 프린트에 빨간 네모 친 단어</p>'+
+     '<p class="small muted" style="margin-bottom:8px">46행 전체 · 가타카나 제외 · <span style="color:var(--shu)">★</span> = 조사로도 쓰는 글자 · <span class="tmark">선생님 표시</span> = 정리본에 네모·동그라미로 표시한 단어 (読む만 파란 네모)</p>'+
      '<div class="row" style="margin-bottom:10px"><button class="chip" id="coverBtn" aria-pressed="false" type="button">뜻 가리기</button><button class="chip" id="coverJp" aria-pressed="false" type="button">히라가나 가리기</button><button class="chip" id="onlyMark" aria-pressed="false" type="button">선생님 표시만</button></div>'+
      groups.map(([g,ks])=>'<h3>'+esc(g)+'</h3>'+[...ks].map(k=>{
        const list = WORDS.filter(w=>w.r===k);
@@ -955,6 +1054,7 @@ function noteBody(s){
          (list.length? list.map(w=>'<span class="w'+(w.t?' marked':'')+'"><span class="cj">'+J(w.k)+'</span>'+(w.j?'<span class="kj">'+esc(w.j)+'</span>':'')+'<span class="cm">'+esc(w.m)+'</span>'+(w.t?'<span class="tmark">표시</span>':'')+'</span>').join('') : '<span class="small muted">'+esc(EMPTY_ROWS[k]||'')+'</span>')+
        '</div></div>';
      }).join('')).join('')+
+     '<div class="callout ai" style="margin-top:12px"><b>수업 메모</b> — '+J('にく')+' 고기 ↔ '+J('くに')+' 나라 (글자 순서만 반대!) · '+J('島国(しまぐに)')+' 섬나라 = しま + くに (く→ぐ 탁음)</div>'+
      '<h3>인사·수업 시트에 나온 단어</h3><div class="words">'+WORDS2.map(w=>'<span class="w"><span class="cj">'+J(w.k)+'</span>'+(w.j?'<span class="kj">'+esc(w.j)+'</span>':'')+'<span class="cm">'+esc(w.m)+'</span></span>').join('')+'</div>';
   }
   if(s==='particle'){
@@ -974,6 +1074,7 @@ function noteBody(s){
      KOSOADO.rows.map(r=>'<tr><td><b>'+esc(r.name)+'</b><div class="small muted">'+r.end.replace(/[ぁ-ゖ]+/g,m=>J(m))+'</div></td>'+r.w.map(([j,k])=>'<td'+(j==='あそこ'?' class="mark"':'')+'>'+J(j)+'<div class="small muted">'+cov(esc(k))+'</div></td>').join('')+'</tr>').join('')+
      '</tbody></table></div>'+
      '<div class="callout" style="margin-top:12px"><b>예외</b> — 장소의 "저기"는 '+J('あこ')+'가 아니라 '+J('あそこ')+'.</div>'+
+     '<p class="small muted" style="margin-top:6px">'+J('こちら·どちら')+'는 여기·어디의 정중한 말로도 쓰지만, 시험 표 기준은 이쪽·어느 쪽이에요. 선생님 메모: れ=물건 · こ=장소 · ちら=방향 · の/んな=명사 수식.</p>'+
      '<div class="callout ai" style="margin-top:8px"><b>구분</b> — '+J('この·その·あの·どの')+'는 뒤에 명사가 와야 해요 ('+J('この くつ')+' 이 신발). '+J('これ·それ·あれ·どれ')+'는 혼자서 "~것".</div>';
   }
   if(s==='homo'){
@@ -1022,13 +1123,13 @@ function noteBody(s){
   if(s==='youbi'){
     return '<h2>요일 <span class="jp">曜日(ようび)</span></h2>'+coverToggle('읽기 가리기')+
      '<div class="tbl"><table><thead><tr><th>한자</th><th>읽기</th><th>뜻</th></tr></thead><tbody>'+YOUBI.map(y=>'<tr><td class="big-jp">'+J(y.j)+'</td><td>'+cov(J(y.k))+'</td><td>'+esc(y.m)+'</td></tr>').join('')+'</tbody></table></div>'+
-     '<div class="callout" style="margin-top:10px"><b>주의</b> — '+J('何曜日')+'는 '+J('なにようび')+'가 아니라 '+J('なんようび')+'. '+J('土曜日')+'는 '+J('どようび')+' (탁음 ど).</div>';
+     '<div class="callout" style="margin-top:10px"><b>주의</b> — 선생님 프린트 기준 '+J('何曜日')+' = '+J('なんようび')+' (なにようび라고도 읽지만 시험은 なんようび). '+J('土曜日')+'는 '+J('どようび')+' (탁음 ど).</div>';
   }
   if(s==='daku'){
     const t = (rows)=>'<div class="tbl"><table><tbody>'+rows+'</tbody></table></div>';
     const line = (orig,list)=>'<tr><th>원래</th>'+orig.map(k=>'<td class="big-jp">'+J(k)+'</td>').join('')+'</tr><tr><th>탁음 ゛</th>'+list.map(x=>'<td'+(['じ','ぢ','づ'].includes(x[0])?' class="mark"':'')+'>'+J(x[0])+'<div class="small muted">'+esc(x[2])+'</div></td>').join('')+'</tr>';
     return '<h2>탁음 · 반탁음 · 장음 <span class="jp">濁音・半濁音・長音</span></h2>'+
-     '<div class="callout ai"><b>한 줄 요약</b><ul class="tight"><li>탁음 ゛ = 점 두 개 → 소리를 유성음으로 — 총 <b>20개</b></li><li>반탁음 ゜ = 동그라미 → p 소리로 — <b>は행에만</b>, 총 <b>5개</b></li><li>장음 = 모음 글자를 하나 더 붙여 앞 소리를 길게 끈다</li></ul></div>'+
+     '<div class="callout ai"><b>한 줄 요약</b><ul class="tight"><li>탁음 ゛ = 점 두 개 → 소리를 유성음으로 — 총 <b>20개</b></li><li>반탁음 ゜ = 동그라미 → p 소리로 — <b>は행에만</b>, 총 <b>5개</b></li><li>장음 = 모음 글자를 하나 더 붙여 앞 소리를 길게 끈다 — 모든 단에 있음</li><li>゛·゜는 글자 <b>오른쪽 위</b>에 찍기</li></ul></div>'+
      '<h3>탁음 ゛ (k→g · s→z · t→d · h→b)</h3>'+
      t(line(['か','き','く','け','こ'],DAKU.slice(0,5))+line(['さ','し','す','せ','そ'],DAKU.slice(5,10))+line(['た','ち','つ','て','と'],DAKU.slice(10,15))+line(['は','ひ','ふ','へ','ほ'],DAKU.slice(15,20)))+
      '<div class="callout" style="margin-top:10px"><b>발음이 규칙에서 벗어나는 3개 — 시험에 반드시 나옴</b><ul class="tight"><li>'+J('し → じ')+' [지] — zi가 아님</li><li>'+J('ち → ぢ')+' [지] — di가 아님</li><li>'+J('つ → づ')+' [즈] — du가 아님</li></ul><div class="small">'+J('じ')+'와 '+J('ぢ')+'는 소리가 똑같고, 기본은 거의 다 '+J('じ')+'.</div></div>'+
@@ -1041,19 +1142,19 @@ function noteBody(s){
        .map(r=>'<tr'+(r[5]?' style="background:var(--shu-soft)"':'')+'><td>'+esc(r[0])+'</td><td class="big-jp">'+J(r[1])+'</td><td>'+J(r[2])+'</td><td>['+esc(r[3])+']</td><td>'+esc(r[4])+'</td></tr>').join(''))+
      '<div class="callout" style="margin-top:10px"><b>え단에 い, お단에 う — 여기가 전부</b><div class="small">쓰는 글자와 읽는 소리가 달라요. '+J('とけい')+'는 [토케이]가 아니라 [토케-], '+J('こうこう')+'는 [코우코우]가 아니라 [코-코-]. 붙은 い·う는 "앞 소리를 길게 끌어라"는 표시.</div></div>'+
      '<h3>박자로 확인</h3>'+
-     t('<tr><th>단어</th><th>박자</th><th>박</th><th>읽기</th></tr>'+[['とけい','토케-'],['こうこう','코-코-'],['さとう','사토-'],['ありがとう','아리가토-'],['おはよう','오하요-']].map(([w,r])=>'<tr><td>'+J(w)+'</td><td>'+moraSplit(w).map(J).join('·')+'</td><td>'+moraCount(w)+'박</td><td>['+esc(r)+']</td></tr>').join(''))+
-     '<p class="small" style="margin-top:6px">장음도 한 박을 차지해요. 글자 수 = 박자 수.</p>';
+     t('<tr><th>단어</th><th>박자</th><th>박</th><th>읽기</th></tr>'+[['とけい','토케-'],['こうこう','코-코-'],['さとう','사토-'],['ありがとう','아리가토-'],['おはよう','오하요-']].map(([w,r])=>'<tr><td>'+J(w)+'</td><td>'+moraDisp(w).map(J).join('·')+'</td><td>'+moraCount(w)+'박</td><td>['+esc(r)+']</td></tr>').join(''))+
+     '<p class="small" style="margin-top:6px">장음도 한 박을 차지해요. 작은 ゃ·ゅ·ょ만 빼면 글자 수 = 박자 수.</p>';
   }
   if(s==='small'){
     const t = (rows)=>'<div class="tbl"><table><tbody>'+rows+'</tbody></table></div>';
     return '<h2>작은 글자 — 촉음 っ · 요음 ゃゅょ <span class="jp">促音・拗音</span></h2>'+
      '<h3>큰 글자 vs 작은 글자 — 이게 전부</h3>'+
      t('<tr><th>쓰는 법</th><th>그 글자</th><th>읽기</th><th>박</th><th>뜻</th></tr>'+
-       [['きつて','큰 つ','키·츠·테','3박','그런 단어 없음'],['きって','작은 っ','킷·테','3박','우표 ← 정답'],['きよう','큰 よ','키·요·우','3박','솜씨가 좋음'],['きょう','작은 ょ','쿄·ー','2박','오늘 ← 다른 단어']]
+       [['きつて','큰 つ','키·츠·테','3박','그런 단어 없음'],['きって','작은 っ','킷·테','3박','우표 ← 정답'],['きよう','큰 よ','키·요·ー','3박','솜씨가 좋음'],['きょう','작은 ょ','쿄·ー','2박','오늘 ← 다른 단어']]
        .map(r=>'<tr><td class="big-jp">'+J(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td><td>'+r[3]+'</td><td>'+esc(r[4])+'</td></tr>').join(''))+
      '<div class="callout" style="margin-top:10px"><b>핵심</b> — 작은 글자는 앞 글자에 달라붙어 소리를 바꿔요. 쓸 때 <b>다른 칸의 2/3 크기로 아래쪽에</b> 붙여 쓰기. 작게 안 쓰면 바로 오답.</div>'+
      '<h3>촉음 っ — 받침 역할</h3><ul class="tight"><li>소리가 없다 — [츠]라고 읽지 않음. 숨을 멈추는 한 박</li><li>한 박을 차지한다</li><li>뒤 글자의 자음이 받침이 된다 — '+J('っ+か')+' = ㄱ받침, '+J('っ+て')+' = ㅅ받침, '+J('っ+ぱ')+' = ㅂ받침</li><li>뒤에 か·さ·た·ぱ행만 온다 (な행·ま행 앞엔 안 옴)</li></ul>'+
-     t('<tr><th>단어</th><th>박자</th><th>박</th><th>읽기</th><th>뜻</th></tr>'+[['いってきます','잇테키마스','다녀오겠습니다 ★범위'],['いってらっしゃい','잇테랏샤이','다녀오세요 ★범위'],['きって','킷테','우표'],['がっこう','각코-','학교']].map(([w,r,m])=>'<tr><td>'+J(w)+'</td><td class="small">'+moraSplit(w).map(J).join('·')+'</td><td>'+moraCount(w)+'박</td><td>'+esc(r)+'</td><td>'+esc(m)+'</td></tr>').join(''))+
+     t('<tr><th>단어</th><th>박자</th><th>박</th><th>읽기</th><th>뜻</th></tr>'+[['いってきます','잇테키마스','다녀오겠습니다 ★범위'],['いってらっしゃい','잇테랏샤이','다녀오세요 ★범위'],['きって','킷테','우표'],['がっこう','각코-','학교']].map(([w,r,m])=>'<tr><td>'+J(w)+'</td><td class="small">'+moraDisp(w).map(J).join('·')+'</td><td>'+moraCount(w)+'박</td><td>'+esc(r)+'</td><td>'+esc(m)+'</td></tr>').join(''))+
      '<div class="callout" style="margin-top:10px"><b>큰 つ와 헷갈리지 말 것</b> — '+J('くつ')+'(신발) · '+J('くつした')+'(양말) · '+J('いつ')+'(언제) · '+J('つくえ')+'(책상) · '+J('なつ')+'(여름)은 전부 큰 つ. [쿠츠][쿠츠시타][이츠][츠쿠에][나츠].</div>'+
      '<h3>요음 ゃ ゅ ょ — 두 글자가 한 박</h3><p class="small">い단 글자(き し ち に ひ み り + 탁음·반탁음) + 작은 ゃ·ゅ·ょ. い 자신에게는 안 붙어요. 표는 "50음도" 탭에 있어요.</p>'+
      t('<tr><th>단어</th><th>박자</th><th>박</th><th>읽기</th><th>뜻</th></tr>'+[['びょういん','뵤-인','병원'],['びよういん','비요-인','미용실'],['きょう','쿄-','오늘'],['きよう','키요-','솜씨 좋음']].map(([w,r,m])=>'<tr><td class="big-jp">'+J(w)+'</td><td class="small">'+moraSplit(w).map(J).join('·')+'</td><td>'+moraCount(w)+'박</td><td>'+esc(r)+'</td><td>'+esc(m)+'</td></tr>').join(''))+
@@ -1064,7 +1165,7 @@ function noteBody(s){
        '<tr><td>'+J('いってきます')+'</td><td>촉음 っ</td><td>잇테키마스</td><td class="small">'+J('和栗')+'[와구리] 가게를 나설 때 하는 말</td></tr>'+
        '<tr><td>'+J('いってらっしゃい')+'</td><td>촉음 っ×2, 요음 しゃ</td><td>잇테랏샤이</td><td class="small">가게에서 보내며 하는 말. 범위 내 최고 난도</td></tr>'+
        '<tr><td>'+J('桔梗女子')+'<div class="small">'+J('ききょうじょし')+'</div></td><td>요음 きょ, 요음 じょ</td><td>키쿄-조시</td><td class="small">'+J('薫子')+'가 다니는 학교</td></tr>')+
-     '<div class="callout ai" style="margin-top:10px"><b>'+J('桔梗女子')+' 하나로 전부 점검</b> — '+J('きょう')+' → 요음 + お단 장음 | '+J('じょ')+' → 탁음 + 요음 | 전체 [키쿄-조시]</div>';
+     '<div class="callout ai" style="margin-top:10px"><b>'+J('桔梗女子')+' 하나로 전부 점검</b> — '+J('きょう')+' → 요음 + お단 장음 | '+J('じょ')+' → 탁음 + 요음 | 전체 [키쿄-조시]. 장음은 '+J('きょう')+'의 '+J('う')+' 하나, じょ는 [죠]·[조] 같은 소리.</div>';
   }
   if(s==='check'){
     return '<h2>시험 직전 점검 <span class="jp">確認</span></h2>'+
@@ -1100,15 +1201,23 @@ function bindNote(){
   note.addEventListener('keydown', e=>{ if((e.key==='Enter'||e.key===' ') && e.target.classList && e.target.classList.contains('cov')){ e.preventDefault(); e.target.classList.toggle('show'); }});
   if($('#onlyMark')) $('#onlyMark').addEventListener('click',e=>{ const b=e.currentTarget; const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on);
     $$('.w',note).forEach(w=>{ w.hidden = on && !w.classList.contains('marked'); });
-    $$('.wordrow',note).forEach(r=>{ r.hidden = on && !$('.w.marked',r); }); });
+    $$('.wordrow',note).forEach(r=>{ r.hidden = on && !$('.w.marked',r); });
+    $$('h3',note).forEach(h=>{ let n=h.nextElementSibling, any=false; while(n && n.tagName!=='H3'){ if(!n.hidden && (n.classList.contains('wordrow'))) any=true; n=n.nextElementSibling; } const w2=h.nextElementSibling && h.nextElementSibling.classList.contains('words'); h.hidden = on && (w2 || !any); if(w2) h.nextElementSibling.hidden = on; }); });
   // 50음도
   if($('#hideRead')) $('#hideRead').addEventListener('click',e=>{ const b=e.currentTarget; const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on); $$('.gojuon .r',note).forEach(r=>r.style.visibility=on?'hidden':'visible'); });
+  if($('#hideKana')) $('#hideKana').addEventListener('click',e=>{ const b=e.currentTarget; const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on); $$('.gojuon button .jp',note).forEach(j=>j.style.visibility=on?'hidden':'visible'); });
+  $$('.gojuon button[data-k]',note).forEach(b=>b.addEventListener('click',()=>{ const jj=$('.jp',b); if(jj) jj.style.visibility='visible'; }));
   $$('.gojuon button[data-k]',note).forEach(b=>b.addEventListener('click',()=>{
     const k=b.dataset.k; const f=SEION.concat(DAKU,HANDAKU).find(x=>x[0]===k);
     const ws = WORDS.filter(w=>w.r===k);
     const box=$('#kinfo'); if(!box) return; box.hidden=false;
     box.innerHTML='<b>'+J(k)+' ['+esc(f[2])+'] '+esc(f[1])+'</b>'+(STAR_ROWS.includes(k)?' <span class="tmark">★ 조사</span>':'')+'<div class="small">'+(ws.length?ws.map(w=>J(w.k)+(w.j?' '+J(w.j):'')+' '+esc(w.m)).join(' · '):(EMPTY_ROWS[k]||'이 글자는 탁음·반탁음이에요.'))+'</div>';
-    $$('.gojuon .r',note).forEach(r=>r.style.visibility='visible'); if($('#hideRead')) $('#hideRead').setAttribute('aria-pressed','false');
+    const r=$('.r',b); if(r) r.style.visibility='visible';
+  }));
+  $$('.gojuon button[data-y]',note).forEach(b=>b.addEventListener('click',()=>{
+    const k=b.dataset.y; const f=YOON.find(x=>x[0]===k); const box=$('#kinfo'); if(!box) return; box.hidden=false;
+    box.innerHTML='<b>'+J(k)+' ['+esc(f[2])+'] '+esc(f[1])+'</b><div class="small">'+J(k[0])+' + 작은 '+J(k[1])+' = 한 박. 크게 쓰면 '+J(k[0]+TO_BIG[k[1]])+' (두 박) — 다른 말이 돼요.</div>';
+    const r=$('.r',b); if(r) r.style.visibility='visible';
   }));
   // 퍼즐
   if($('#puzzle')) bindPuzzle();
@@ -1135,11 +1244,14 @@ function bindPuzzle(){
     if(!start){ start=p; b.classList.add('sel'); msg('마지막 글자를 누르세요'); return; }
     at(start.r,start.c).classList.remove('sel');
     const ln=line(start,p); start=null;
-    if(!ln || ln.length<2){ update(); return; }
+    if(!ln){ msg('가로·세로·대각선 직선으로 골라 주세요'); return; }
+    if(ln.length<2){ update(); return; }
     const word = ln.map(x=>PUZZLE[x.r][x.c]).join('');
-    const hit = PUZZLE_ANS.find(a=>a.w===word);
+    const hit = PUZZLE_ANS.find(a=>a.w===word || a.w===[...word].reverse().join(''));
     if(hit && !found.has(hit.n)){ found.add(hit.n); mark(ln,hit.n); const tr=$('tr[data-pn="'+hit.n+'"]'); if(tr){ $$('.cov',tr).forEach(c=>c.classList.add('show')); const pp=$('.pzpos',tr); if(pp) pp.hidden=false; } update(); }
     else if(hit) update();
+    else if(word==='どうも'||word==='もうど') msg('どうも도 감사 인사지만, 4번 정답은 ありがとう예요. 더 찾아보세요');
+    else if(word==='どうぞ'||word==='ぞうど') msg('どうぞ는 よろしく 앞에 붙는 말. 6번 정답은 よろしく');
     else msg('「'+word+'」은(는) 정답이 아니에요');
   });
   // 정답 칸 위치
@@ -1219,7 +1331,7 @@ function viewQ(){
   }
   app.innerHTML = header(esc(s.title))+
    '<div class="qhead"><span class="count">'+(s.i+1)+' / '+s.items.length+'</span><div class="bar" style="flex:1"><i style="width:'+pct+'%;background:var(--ink)"></i></div><span class="small muted">맞음 '+s.res.filter(r=>r&&r.ok).length+'</span></div>'+
-   '<div class="qcard">'+verdict+
+   '<div class="qcard'+(answered?' done':'')+'">'+verdict+
     '<div class="qtag"><span>'+esc(deck.group)+' · '+esc(deck.name)+'</span>'+(it.hot?'<span class="hot">출제 유력</span>':'')+'</div>'+
     '<div class="qprompt">'+it.q+'</div>'+(it.hint?'<div class="qhint">'+it.hint+'</div>':'')+
     body+
@@ -1230,7 +1342,7 @@ function viewQ(){
   $$('.opt').forEach(b=>b.addEventListener('click',()=>answer(s.opts[s.i][+b.dataset.o])));
   if($('#skip')) $('#skip').addEventListener('click',()=>answer(null));
   if($('#next')) $('#next').addEventListener('click',next);
-  if($('#quit')) $('#quit').addEventListener('click',()=>{ s.items = s.items.slice(0,s.i+1); s.opts=s.opts.slice(0,s.i+1); finish(); });
+  if($('#quit')) $('#quit').addEventListener('click',()=>{ s.planned = s.items.length; s.quit = s.i+1<s.items.length; s.items = s.items.slice(0,s.i+1); s.opts=s.opts.slice(0,s.i+1); finish(); });
   if($('#flip')) $('#flip').addEventListener('click',()=>{ s.flip=true; viewQ(); });
   if($('#cYes')) $('#cYes').addEventListener('click',()=>{ s.flip=false; answer(it.a, true); });
   if($('#cNo')) $('#cNo').addEventListener('click',()=>{ s.flip=false; answer('', false); });
@@ -1261,13 +1373,13 @@ function finish(){
   const s=session; s.done=true;
   const n=s.items.length, ok=s.res.filter(r=>r&&r.ok).length;
   const wrong = s.items.map((it,i)=>({it,r:s.res[i]})).filter(x=>!x.r||!x.r.ok);
-  const score = s.kind==='exam' ? Math.round(ok/n*100) : null;
+  const score = s.kind==='exam' ? Math.round(ok/(s.planned||n)*100) : null;
   // 단원별
   const byDeck = {};
   s.items.forEach((it,i)=>{ const d=byDeck[it.deck]||(byDeck[it.deck]={n:0,ok:0}); d.n++; if(s.res[i]&&s.res[i].ok) d.ok++; });
   app.innerHTML = header(esc(s.title)+' — 결과')+
    '<div class="stack"><section class="sheet stack">'+
-    (score!=null?'<div class="score"><b>'+score+'</b><span>점 / 100</span></div>':'<div class="score"><b>'+ok+'</b><span>/ '+n+' 맞음</span></div>')+
+    (score!=null?'<div class="score"><b>'+score+'</b><span>점 / 100'+(s.quit?' (중간에 그만둠 — 안 푼 문제는 틀린 것으로)':'')+'</span></div>':'<div class="score"><b>'+ok+'</b><span>/ '+n+' 맞음</span></div>')+
     '<div class="bar"><i style="width:'+Math.round(ok/n*100)+'%"></i></div>'+
     '<div class="small">'+Object.entries(byDeck).map(([d,v])=>esc(DECK[d].name)+' '+v.ok+'/'+v.n).join(' · ')+'</div>'+
     '<div class="row">'+(wrong.length?'<button class="btn shu" id="retryWrong" type="button">틀린 '+wrong.length+'문제 다시</button>':'')+'<button class="btn" id="again" type="button">'+(s.kind==='exam'?'새 모의고사':'새로 풀기')+'</button><a class="btn ghost" href="#home" style="text-decoration:none">홈</a></div>'+
@@ -1276,7 +1388,7 @@ function finish(){
    '</div>';
   if($('#retryWrong')) $('#retryWrong').addEventListener('click',()=>startQuiz(shuffle(wrong.map(x=>x.it)), s.mode==='card'?'card':s.mode, '틀린 문제 다시', 'quiz'));
   $('#again').addEventListener('click',()=>{ if(s.kind==='exam') startExam(); else { session=null; location.hash='#quiz'; route(); } });
-  if(s.kind==='exam'){ const h=store.get('examHist',[]); h.push({d:new Date().toISOString().slice(0,10),s:score}); store.set('examHist',h.slice(-20)); }
+  if(s.kind==='exam'){ const h=store.get('examHist',[]); h.push({d:ymd(),s:score,q:s.quit?1:0}); store.set('examHist',h.slice(-20)); }
   bindTheme();
 }
 
@@ -1289,6 +1401,7 @@ function kanaPad(){
    '<div class="padctl"><button type="button" data-pc="ん"><span class="jp">ん</span></button><button type="button" data-pc="dak" aria-label="탁점 붙이기">゛</button><button type="button" data-pc="han" aria-label="반탁점 붙이기">゜</button><button type="button" data-pc="small" aria-label="작은 글자로">小</button><button type="button" data-pc="space" aria-label="띄어쓰기">␣</button><button type="button" data-pc="bs" aria-label="지우기">⌫</button></div>';
 }
 function bindPad(inp){
+  $$('.pad button,.padctl button').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
   $$('[data-pk]').forEach(b=>b.addEventListener('click',()=>{ inp.value += b.dataset.pk; session.draft=inp.value; }));
   $$('[data-pc]').forEach(b=>b.addEventListener('click',()=>{
     const v=inp.value, last=v.slice(-1), head=v.slice(0,-1); const c=b.dataset.pc;
@@ -1314,17 +1427,17 @@ function viewWrong(){
     (weak.length>80?'<p class="small muted">최근 80개만 보여요.</p>':'')+'</section>'
     : '<div class="sheet empty"><span class="jp">○</span>틀린 문제가 아직 없어요. 퀴즈를 풀면 여기에 모여요.</div>')+
    (fixed.length?'<section class="sheet"><h2>극복한 문제 '+fixed.length+'개</h2><p class="small muted">한 번 이상 틀렸지만 지금은 3번 연속 맞힌 문제예요.</p></section>':'')+
-   '<section class="sheet stack"><h2>기록 초기화</h2><p class="small muted">진도와 오답 기록을 모두 지워요. 되돌릴 수 없어요.</p><div class="row"><button class="btn ghost" id="resetAsk" type="button">초기화</button><span id="resetConfirm" hidden><button class="btn shu" id="resetYes" type="button">정말 지우기</button></span></div></section>'+
+   '<section class="sheet stack"><h2>기록 초기화</h2><p class="small muted">진도·오답 기록·모의고사 점수를 모두 지워요. 되돌릴 수 없어요.</p><div class="row"><button class="btn ghost" id="resetAsk" type="button">초기화</button><span id="resetConfirm" hidden><button class="btn shu" id="resetYes" type="button">정말 지우기</button></span></div></section>'+
    '</div>';
   if($('#wGo')) $('#wGo').addEventListener('click',()=>startQuiz(shuffle(weak).slice(0,30),'mc','오답 다시'));
   if($('#wCard')) $('#wCard').addEventListener('click',()=>startQuiz(shuffle(weak).slice(0,30),'card','오답 카드'));
   $('#resetAsk').addEventListener('click',()=>{ $('#resetConfirm').hidden=false; });
-  $('#resetYes').addEventListener('click',()=>{ PROG={}; store.set('prog',{}); store.set('stats',{}); viewWrong(); });
+  $('#resetYes').addEventListener('click',()=>{ PROG={}; session=null; store.set('prog',{}); store.set('stats',{}); store.set('examHist',[]); viewWrong(); });
   bindTheme();
 }
 
 /* ---------- MOCK EXAM ---------- */
-const EXAM_PLAN = [['wordm',3],['wordw',4],['kanji',2],['homo',1],['particle',3],['kosoado',2],['greet',3],['aisatsu',2],['youbi',1],['rules',1],['small',2],['pron',1]];
+const EXAM_PLAN = [['wordm',2],['wordw',4],['kanji',1],['homo',1],['particle',3],['kosoado',2],['greet',3],['aisatsu',2],['youbi',1],['rules',1],['small',2],['spell',1],['mora',1],['pron',1]];
 function startExam(){
   const picked = [];
   EXAM_PLAN.forEach(([d,n])=>{ picked.push.apply(picked, weightedPick(ITEMS.filter(i=>i.deck===d && !picked.includes(i)), n)); });
@@ -1337,7 +1450,7 @@ function viewExamStart(){
    '<div class="tbl"><table><thead><tr><th>영역</th><th>문항</th></tr></thead><tbody>'+EXAM_PLAN.map(([d,n])=>'<tr><td>'+esc(DECK[d].name)+'</td><td>'+n+'</td></tr>').join('')+'</tbody></table></div>'+
    '<p class="small muted">약한 문제가 더 잘 나와요. 한 문제씩 바로 채점되고, 끝나면 틀린 문제 해설이 모여 나와요.</p>'+
    '<button class="btn primary" id="exGo" type="button">시험 시작</button></section>'+
-   (h.length?'<section class="sheet"><h2 style="margin-bottom:8px">지난 점수</h2><div class="row">'+h.slice(-10).map(x=>'<span class="chip"><b style="font-variant-numeric:tabular-nums">'+x.s+'</b>점 <span class="muted small">'+esc(x.d.slice(5))+'</span></span>').join('')+'</div></section>':'')+
+   (h.length?'<section class="sheet"><h2 style="margin-bottom:8px">지난 점수</h2><div class="row">'+h.slice(-10).map(x=>'<span class="chip"><b style="font-variant-numeric:tabular-nums">'+x.s+'</b>점 <span class="muted small">'+esc(x.d.slice(5))+(x.q?' 중단':'')+'</span></span>').join('')+'</div></section>':'')+
    '</div>';
   $('#exGo').addEventListener('click',startExam);
   bindTheme();
@@ -1347,17 +1460,20 @@ function viewExamStart(){
 function bindTheme(){
   const b=$('#themeBtn'); if(!b) return;
   const cur = document.documentElement.getAttribute('data-theme')||'';
-  b.textContent = cur==='dark'?'어두운 화면':cur==='light'?'밝은 화면':'화면: 기기 설정';
-  b.onclick = ()=>{ const n = cur===''?'dark':cur==='dark'?'light':''; if(n) document.documentElement.setAttribute('data-theme',n); else document.documentElement.removeAttribute('data-theme'); store.set('theme',n); bindTheme(); };
+  b.textContent = cur==='dark'?'화면: 어둡게':cur==='light'?'화면: 밝게':'화면: 기기 설정';
+  b.onclick = ()=>{ const sysDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches; const n = cur==='' ? (sysDark?'light':'dark') : ''; if(n) document.documentElement.setAttribute('data-theme',n); else document.documentElement.removeAttribute('data-theme'); store.set('theme',n); bindTheme(); };
 }
 (function(){ const t=store.get('theme',''); if(t) document.documentElement.setAttribute('data-theme',t); })();
 
 /* keyboard: 1~4, Enter */
 document.addEventListener('keydown',e=>{
   if(!session || session.done) return;
-  const h=location.hash; if(h!=='#quiz' && h!=='#exam') return;
+  const h=location.hash; if(!((h==='#quiz'&&session.kind==='quiz')||(h==='#exam'&&session.kind==='exam'))) return;
+  if(!document.querySelector('.qcard')) return;
   if(e.target && (e.target.tagName==='INPUT')) return;
+  if(e.target && e.target.closest && e.target.closest('.pad,.padctl')) { if(e.key==='Enter'){ e.preventDefault(); const inp=$('#ans'); if(inp && !session.res[session.i]) answer(inp.value); } return; }
   const s=session;
+  if(!s.res[s.i] && s.mode==='type' && e.key==='Enter'){ const inp=$('#ans'); if(inp){ e.preventDefault(); answer(inp.value); } return; }
   if(!s.res[s.i] && s.mode==='mc' && /^[1-4]$/.test(e.key)){ const o=s.opts[s.i][+e.key-1]; if(o!==undefined) answer(o); }
   else if(s.res[s.i] && (e.key==='Enter'||e.key==='ArrowRight')){ e.preventDefault(); next(); }
 });
